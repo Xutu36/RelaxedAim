@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+}
+
+def gameDir = file('D:/steam/steamapps/common/ProjectZomboid')
+def modDir = file('../42')
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+dependencies {
+    // The game and ZombieBuddy provide these classes at runtime. Do not package them in this mod JAR.
+    compileOnly files(new File(gameDir, 'projectzomboid.jar'))
+    compileOnly files(new File(gameDir, 'ZombieBuddy.jar'))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+jar {
+    archiveBaseName.set('RelaxedAim')
+    archiveVersion.set('')
+    archiveClassifier.set('')
+}
+
+tasks.register('installMod', Copy) {
+    dependsOn tasks.named('jar')
+    from(tasks.named('jar'))
+    into(new File(modDir, 'media/java/client'))
+    rename { 'RelaxedAim.jar' }
+}
+
+tasks.named('build') {
+    finalizedBy(tasks.named('installMod'))
+}
+
+tasks.register('deployLocalMod', Sync) {
+    dependsOn tasks.named('installMod')
+    into file('C:/Users/Administrator/Zomboid/mods/RelaxedAim')
+    from(file('../common')) {
+        into 'common'
+    }
+    from(file('../42')) {
+        into '42'
+    }
+}

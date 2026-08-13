@@ -1,0 +1,10 @@
+name=忘关就是开了？
+id=RelaxedAim
+author=徐图
+description=Client-side aim-assist mod for Project Zomboid Build 42.
+url=
+
+require=\ZombieBuddy
+ZBVersionMin=2.3.2
+javaJarFile=media/java/client/RelaxedAim.jar
+javaPkgName=com.relaxedaim

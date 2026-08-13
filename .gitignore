@@ -1,0 +1,5 @@
+.gradle/
+java/.gradle/
+java/build/
+42/media/java/client/*.jar
+!42/media/java/client/.gitkeep
