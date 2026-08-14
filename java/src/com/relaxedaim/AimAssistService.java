@@ -74,6 +74,10 @@ public final class AimAssistService {
 
         // 模组选项刷新（1s 节流，读 ModOptions.ini）
         RelaxedAimConfig.refreshModOptions();
+        // 服务器沙盒设置刷新（1s 节流，辅助强度）
+        RelaxedAimConfig.refreshSandboxOptions();
+        // 临时启用/禁用热键
+        checkHotkey();
 
         // 锁定总开关关闭时：只更新瞄准调试状态，不做候选/锁定
         if (!RelaxedAimConfig.optionLockOn) {
@@ -190,6 +194,29 @@ public final class AimAssistService {
 
     public static int playerIndex = -1;
 
+    /** 键位名（与 Lua 里追加的 keyBinding.value 一致，玩家可在 设置→键位 中重设）。 */
+    public static final String TOGGLE_KEY = "Toggle RelaxedAim";
+    public static boolean keybindRegistered = false;
+
+    /**
+     * 临时启用/禁用热键：首次调用时用默认键（H=35）注册到 Core（若已被玩家重设则使用其设定键），
+     * 之后每帧检查边缘触发切换 optionLockOn。
+     */
+    public static void checkHotkey() {
+        try {
+            if (!keybindRegistered) {
+                keybindRegistered = true;
+                zombie.core.Core.getInstance().addKeyBinding(TOGGLE_KEY, 35, 0, false, false, false);
+            }
+            if (zombie.input.GameKeyboard.isKeyPressed(TOGGLE_KEY)) {
+                RelaxedAimConfig.optionLockOn = !RelaxedAimConfig.optionLockOn;
+                TargetLockService.clearLock("toggle");
+                System.out.println("[RelaxedAim] Hotkey toggle -> LockOn=" + RelaxedAimConfig.optionLockOn);
+            }
+        } catch (Throwable t) {
+        }
+    }
+
     public static int getPlayerIndex() {
         try {
             playerIndex = IsoPlayer.getPlayerIndex();
@@ -256,9 +283,14 @@ public final class AimAssistService {
         if (maxRange <= 0.0f || maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
             maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
         }
+        // 最大锁定距离：与武器射程取较小值
+        final float lockMax = RelaxedAimConfig.optionMaxLockDistance;
+        if (lockMax > 0f && lockMax < maxRange) {
+            maxRange = lockMax;
+        }
 
         final float lockRadius = TargetLockService.effectiveLockRadiusPx(playerIndex);
-        final float lockRadiusWorld = RelaxedAimConfig.lockRadiusWorld;
+        final float lockRadiusWorld = RelaxedAimConfig.optionLockRadiusWorld;
         final int maxCands = RelaxedAimConfig.maxCandidates;
 
         float minScreenDist = Float.MAX_VALUE;

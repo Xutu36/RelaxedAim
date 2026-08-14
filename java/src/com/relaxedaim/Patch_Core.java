@@ -38,51 +38,54 @@ public final class Patch_Core {
         } catch (Exception e) {
         }
 
-        draw(font, x, y, "RelaxedAim " + RelaxedAimConfig.VERSION, 0.55f, 1.0f, 0.55f, 1.0f);
-        y += lineH;
-        draw(font, x, y, "Aiming: " + AimAssistService.debugIsAiming, 1.0f, 1.0f, 1.0f, 1.0f);
-        y += lineH;
-        draw(font, x, y, "Weapon: " + AimAssistService.debugWeaponName + " | Ranged: " + AimAssistService.debugHasRangedWeapon, 1.0f, 1.0f, 1.0f, 1.0f);
-        y += lineH;
-        draw(font, x, y, "ZombiesInCell: " + AimAssistService.debugTotalZombies + " | Candidates: " + AimAssistService.debugCandidateCount, 1.0f, 1.0f, 0.0f, 1.0f);
-        y += lineH;
-        draw(font, x, y, "Options: LockOn=" + (RelaxedAimConfig.optionLockOn ? "ON" : "OFF")
-                + " | ShotgunNoLock=" + (RelaxedAimConfig.optionShotgunNoLock ? "ON" : "OFF")
-                + " | Skip=" + AimAssistService.debugSkipReason
-                + (RelaxedAimConfig.optionsReadFailed ? " [READ FAILED]" : ""), 0.7f, 0.8f, 1.0f, 1.0f);
-        y += lineH;
-        if (TargetLockService.debugHasLock) {
-            draw(font, x, y, "Lock: ID=" + TargetLockService.debugLockId
-                    + " sDist=" + String.format("%.1f", TargetLockService.debugLockScreenDist)
-                    + " wDist=" + String.format("%.1f", TargetLockService.debugLockWorldDist)
-                    + " (R=" + (int) RelaxedAimConfig.lockRadiusPx + " x" + RelaxedAimConfig.reFilterMultiplier + ")",
-                    0.35f, 1.0f, 0.35f, 1.0f);
-        } else {
-            // 失锁后显示原因，便于排查
-            String reason = "";
-            long age = System.currentTimeMillis() - TargetLockService.debugReleaseTimeMs;
-            if (TargetLockService.debugReleaseTimeMs > 0) {
-                reason = " (" + TargetLockService.debugReleaseReason + ")";
+        // 调试/信息 HUD（发布时可用 optionShowHud=false 隐藏）
+        if (RelaxedAimConfig.optionShowHud) {
+            draw(font, x, y, "RelaxedAim " + RelaxedAimConfig.VERSION, 0.55f, 1.0f, 0.55f, 1.0f);
+            y += lineH;
+            draw(font, x, y, "Aiming: " + AimAssistService.debugIsAiming, 1.0f, 1.0f, 1.0f, 1.0f);
+            y += lineH;
+            draw(font, x, y, "Weapon: " + AimAssistService.debugWeaponName + " | Ranged: " + AimAssistService.debugHasRangedWeapon, 1.0f, 1.0f, 1.0f, 1.0f);
+            y += lineH;
+            draw(font, x, y, "ZombiesInCell: " + AimAssistService.debugTotalZombies + " | Candidates: " + AimAssistService.debugCandidateCount, 1.0f, 1.0f, 0.0f, 1.0f);
+            y += lineH;
+            draw(font, x, y, "Options: LockOn=" + (RelaxedAimConfig.optionLockOn ? "ON" : "OFF")
+                    + " | Assist=" + String.format("%.2f", RelaxedAimConfig.assistStrength)
+                    + " | Skip=" + AimAssistService.debugSkipReason
+                    + (RelaxedAimConfig.optionsReadFailed ? " [READ FAILED]" : ""), 0.7f, 0.8f, 1.0f, 1.0f);
+            y += lineH;
+            if (TargetLockService.debugHasLock) {
+                draw(font, x, y, "Lock: ID=" + TargetLockService.debugLockId
+                        + " sDist=" + String.format("%.1f", TargetLockService.debugLockScreenDist)
+                        + " wDist=" + String.format("%.1f", TargetLockService.debugLockWorldDist)
+                        + " (R=" + RelaxedAimConfig.optionLockRadiusWorld + " x" + RelaxedAimConfig.reFilterMultiplier + ")",
+                        0.35f, 1.0f, 0.35f, 1.0f);
+            } else {
+                // 失锁后显示原因，便于排查
+                String reason = "";
+                long age = System.currentTimeMillis() - TargetLockService.debugReleaseTimeMs;
+                if (TargetLockService.debugReleaseTimeMs > 0) {
+                    reason = " (" + TargetLockService.debugReleaseReason + ")";
+                }
+                draw(font, x, y, "Lock: none" + reason
+                        + " (R=" + RelaxedAimConfig.optionLockRadiusWorld
+                        + " x" + RelaxedAimConfig.reFilterMultiplier + ")", 0.5f, 0.5f, 0.5f, 1.0f);
             }
-            draw(font, x, y, "Lock: none" + reason
-                    + " (R=" + (int) RelaxedAimConfig.lockRadiusPx
-                    + "px x" + RelaxedAimConfig.reFilterMultiplier + ")", 0.5f, 0.5f, 0.5f, 1.0f);
-        }
-        y += lineH;
+            y += lineH;
 
-        // 常显最近一次失锁原因（含已重新锁定后，仍保留最近失锁原因便于排查）
-        if (TargetLockService.debugReleaseTimeMs > 0) {
-            long agoMs = System.currentTimeMillis() - TargetLockService.debugReleaseTimeMs;
-            String ago = agoMs < 1000 ? String.format("%dms", agoMs)
-                    : String.format("%.1fs", agoMs / 1000.0);
-            draw(font, x, y, "LastLost: " + TargetLockService.debugReleaseReason + " (" + ago + " ago)", 0.9f, 0.6f, 0.4f, 1.0f);
+            // 常显最近一次失锁原因（含已重新锁定后，仍保留最近失锁原因便于排查）
+            if (TargetLockService.debugReleaseTimeMs > 0) {
+                long agoMs = System.currentTimeMillis() - TargetLockService.debugReleaseTimeMs;
+                String ago = agoMs < 1000 ? String.format("%dms", agoMs)
+                        : String.format("%.1fs", agoMs / 1000.0);
+                draw(font, x, y, "LastLost: " + TargetLockService.debugReleaseReason + " (" + ago + " ago)", 0.9f, 0.6f, 0.4f, 1.0f);
+            }
+
+            // 右侧调试面板：实时打印鼠标与锁定目标的关键相对位置
+            drawRightPanel();
         }
 
         // 锁定辅助 UI：范围圈 / 头部锁定指示（紫色圈，锁定目标或最近候选）
         drawLockAssistUI();
-
-        // 右侧调试面板：实时打印鼠标与锁定目标的关键相对位置（用于排查缩放/坐标偏差）
-        drawRightPanel();
     }
 
     /** 右侧对齐调试面板：zoom、鼠标原始/虚拟坐标、锁定目标虚拟/UI 坐标及相对差。 */
@@ -152,7 +155,7 @@ public final class Patch_Core {
             final float vDist = IsoUtils.DistanceTo(mvx, mvy, tvx, tvy);
             final float wDist = TargetLockService.aimWorldValid ? TargetLockService.aimWorldDistTo(z) : 0.0f;
             addRightLine(font, screenW, y, String.format("Dist v=%.1f  world=%.2f (Rw=%.2f)",
-                    vDist, wDist, RelaxedAimConfig.lockRadiusWorld), 1.0f, 1.0f, 0.0f, 1.0f);
+                    vDist, wDist, RelaxedAimConfig.optionLockRadiusWorld), 1.0f, 1.0f, 0.0f, 1.0f);
         } catch (Exception e) {
         }
     }
@@ -160,7 +163,7 @@ public final class Patch_Core {
     public static void addRightLine(UIFont font, int screenW, int y, String text, float r, float g, float b, float a) {
         try {
             final float tw = TextManager.instance.MeasureStringX(font, text);
-            TextManager.instance.DrawString(font, (int) (screenW - tw - 10), y, text, r, g, b, a);
+            TextManager.instance.DrawString(font, (int) (screenW - tw - 10), y, text, r, g, b, a * RelaxedAimConfig.optionHudAlpha);
         } catch (Exception e) {
         }
     }
@@ -218,8 +221,8 @@ public final class Patch_Core {
                 final float cy = TargetLockService.worldScreenY(TargetLockService.aimWorldX,
                         TargetLockService.aimWorldY, TargetLockService.aimWorldZ, pIndex);
                 // 屏幕像素半径 ≈ 世界瓦片 × 32 × tileScale / zoom（iso 近似，用户可按 bool 取舍）
-                final float radius = RelaxedAimConfig.lockRadiusWorld * 32.0f * zombie.core.Core.tileScale / zoom;
-                drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, 0.6f, lw);
+                final float radius = RelaxedAimConfig.optionLockRadiusWorld * 32.0f * zombie.core.Core.tileScale / zoom;
+                drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, 0.6f * RelaxedAimConfig.optionHudAlpha, lw);
             } catch (Exception e) {
             }
         }
@@ -236,7 +239,7 @@ public final class Patch_Core {
                             TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
                     final float ny = TargetLockService.worldScreenY(TargetLockService.sHeadPos.x,
                             TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
-                    drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f, lw);
+                    drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f * RelaxedAimConfig.optionHudAlpha, lw);
                 } catch (Exception e) {
                 }
             }
@@ -245,7 +248,7 @@ public final class Patch_Core {
 
     public static void draw(UIFont font, int x, int y, String text, float r, float g, float b, float a) {
         try {
-            TextManager.instance.DrawString(font, x, y, text, r, g, b, a);
+            TextManager.instance.DrawString(font, x, y, text, r, g, b, a * RelaxedAimConfig.optionHudAlpha);
         } catch (Exception e) {
         }
     }

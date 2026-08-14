@@ -1,0 +1,5 @@
+Sandbox_CH = {
+    Sandbox_RelaxedAim = "RelaxedAim（服务器平衡）",
+    Sandbox_RelaxedAim_AssistStrength = "辅助强度",
+    Sandbox_RelaxedAim_AssistStrength_tooltip = "与玩家瞄准（Aiming）技能等级共同决定：从获得锁定单位到准心平滑移动到丧尸头部所需的时间。越高吸附越快。属于服务器端平衡设置。",
+}

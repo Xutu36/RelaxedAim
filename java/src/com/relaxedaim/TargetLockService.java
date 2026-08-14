@@ -157,22 +157,106 @@ public final class TargetLockService {
 
     /** 复用 Vector3，避免每次分配。 */
     public static final zombie.iso.Vector3 sHeadPos = new zombie.iso.Vector3();
+    public static final zombie.iso.Vector3 sNeckPos = new zombie.iso.Vector3();
 
-    /** 头部世界瞄准点 = Bip01_Head 骨骼 + 姿态自适应偏移（站立沿 +Z 抬 headAimOffsetZ，倒地不抬）。 */
+    /**
+     * 头部世界瞄准点 = Bip01_Head 骨骼 + 沿「颈部→头部」方向的偏移（headAimOffset）。
+     * 方向随姿态自适应：待机低头沿头骨倾斜方向、奔跑略前倾、倒地沿贴地的头骨方向，不依赖简单 Z 轴。
+     */
     public static boolean headAimWorldPos(IsoZombie z, zombie.iso.Vector3 out) {
         try {
             zombie.CombatManager.getBoneWorldPos(z, "Bip01_Head", out);
-            boolean prone = false;
-            try {
-                prone = z.isProne();
-            } catch (Exception e) {
-            }
-            if (!prone) {
-                out.z += RelaxedAimConfig.headAimOffsetZ;
+            zombie.CombatManager.getBoneWorldPos(z, "Bip01_Neck", sNeckPos);
+            float dx = out.x - sNeckPos.x;
+            float dy = out.y - sNeckPos.y;
+            float dz = out.z - sNeckPos.z;
+            final float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (len > 0.001f) {
+                dx /= len;
+                dy /= len;
+                dz /= len;
+                out.x += dx * RelaxedAimConfig.headAimOffset;
+                out.y += dy * RelaxedAimConfig.headAimOffset;
+                out.z += dz * RelaxedAimConfig.headAimOffset;
             }
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    // ---------- 平滑准心吸附 ----------
+
+    /** 平滑吸附：当前准星（reticle）屏幕位置，从原始鼠标向锁定头部平滑移动。 */
+    public static int smoothFrameStamp = -1;
+    public static boolean smoothInit = false;
+    public static float smoothX = 0.0f;
+    public static float smoothY = 0.0f;
+    public static long smoothLastMs = 0L;
+
+    /**
+     * 平滑时间（毫秒）：辅助强度与 Aiming 瞄准等级共同决定。
+     * 强度越高/等级越高 → 时间越短（吸附越快）。
+     */
+    public static float computeSnapTimeMs(int pIndex) {
+        try {
+            float assist = RelaxedAimConfig.assistStrength;
+            int aimLevel = 0;
+            try {
+                aimLevel = zombie.characters.IsoPlayer.getPlayer(pIndex)
+                        .getPerkLevel(zombie.characters.skills.PerkFactory.Perks.Aiming);
+            } catch (Exception e) {
+            }
+            float ms = 1500.0f - assist * 1000.0f - aimLevel * 50.0f;
+            if (ms < 100.0f) {
+                ms = 100.0f;
+            }
+            if (ms > 1500.0f) {
+                ms = 1500.0f;
+            }
+            return ms;
+        } catch (Exception e) {
+            return 500.0f;
+        }
+    }
+
+    /** 每帧推进一次平滑值（以帧号去重）。 */
+    public static void updateLockedSmooth(int pIndex) {
+        final int frame = AimAssistService.frameCounter;
+        if (frame == smoothFrameStamp) {
+            return;
+        }
+        smoothFrameStamp = frame;
+        try {
+            headAimWorldPos(lockedTarget, sHeadPos);
+            final float tx = worldScreenX(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+            final float ty = worldScreenY(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+            final long now = System.currentTimeMillis();
+            if (!smoothInit) {
+                smoothInit = true;
+                smoothX = zombie.input.Mouse.getXA();
+                smoothY = zombie.input.Mouse.getYA();
+                smoothLastMs = now;
+            }
+            float dt = now - smoothLastMs;
+            smoothLastMs = now;
+            if (dt < 0f) {
+                dt = 0f;
+            }
+            if (dt > 100f) {
+                dt = 100f;
+            }
+            final float snapMs = computeSnapTimeMs(pIndex);
+            if (snapMs <= 0f) {
+                smoothX = tx;
+                smoothY = ty;
+                return;
+            }
+            // 指数趋近：时间常数 = snapMs/3（约一个 snapMs 达到 ~95%）
+            final float k = (float) Math.min(1.0, dt / (snapMs * 0.33f));
+            smoothX += (tx - smoothX) * k;
+            smoothY += (ty - smoothY) * k;
+        } catch (Exception e) {
         }
     }
 
@@ -206,14 +290,15 @@ public final class TargetLockService {
         }
     }
 
-    /** 返回锁定丧尸头部的屏幕X；不生效返回 Integer.MIN_VALUE。 */
+    /** 返回锁定丧尸头部的屏幕X（平滑）；不生效返回 Integer.MIN_VALUE。 */
     public static int overrideReticleX(int pIndex) {
         try {
             if (!isLockAimingActive(pIndex)) {
+                smoothInit = false;
                 return Integer.MIN_VALUE;
             }
-            headAimWorldPos(lockedTarget, sHeadPos);
-            return (int) worldScreenX(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+            updateLockedSmooth(pIndex);
+            return (int) smoothX;
         } catch (Exception e) {
             return Integer.MIN_VALUE;
         }
@@ -224,8 +309,8 @@ public final class TargetLockService {
             if (!isLockAimingActive(pIndex)) {
                 return Integer.MIN_VALUE;
             }
-            headAimWorldPos(lockedTarget, sHeadPos);
-            return (int) worldScreenY(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+            updateLockedSmooth(pIndex);
+            return (int) smoothY;
         } catch (Exception e) {
             return Integer.MIN_VALUE;
         }
@@ -277,9 +362,22 @@ public final class TargetLockService {
 
         if (lockedTarget != null) {
             if (isLockValid(player, weapon, mouseX, mouseY)) {
+                invalidSinceMs = 0L;
                 updateDebug();
                 return; // 锁定仍有效，保持不变（滞回区）
             }
+            // 保持时间：非「死亡」原因在短暂失效时暂不释放（遮挡/鼠标短暂偏离等）
+            if (!"dead".equals(pendingReleaseReason) && RelaxedAimConfig.optionLockHoldTimeMs > 0) {
+                final long now = System.currentTimeMillis();
+                if (invalidSinceMs == 0L) {
+                    invalidSinceMs = now;
+                }
+                if (now - invalidSinceMs < RelaxedAimConfig.optionLockHoldTimeMs) {
+                    updateDebug();
+                    return; // 在保持时间内，暂不释放
+                }
+            }
+            invalidSinceMs = 0L;
             releaseLock(pendingReleaseReason);
             // 解除后若本帧已有候选则立即重新锁定，否则等下一次搜索帧
             if (candidates != null) {
@@ -292,12 +390,16 @@ public final class TargetLockService {
         updateDebug();
     }
 
+    /** 锁定暂时失效的起始时间（毫秒），配合 optionLockHoldTimeMs 使用。 */
+    public static long invalidSinceMs = 0L;
+
     /** 清除锁定（未瞄准 / 未持枪时调用）。 */
     public static void clearLock(String reason) {
         if (lockedTarget != null) {
             releaseLock(reason);
         }
         lockedTarget = null;
+        invalidSinceMs = 0L;
     }
 
     /** 锁定有效性校验（每帧对锁定目标做一次，开销极小）。失败时把原因写入 pendingReleaseReason。 */
@@ -321,7 +423,9 @@ public final class TargetLockService {
                 return false;
             }
             final float worldDist = player.DistTo(z);
-            if (worldDist > weapon.getMaxRange()) {
+            final float maxRange = weapon.getMaxRange();
+            final float lockMax = RelaxedAimConfig.optionMaxLockDistance;
+            if (worldDist > (lockMax > 0f && lockMax < maxRange ? lockMax : maxRange)) {
                 pendingReleaseReason = "range";
                 return false;
             }
@@ -334,7 +438,7 @@ public final class TargetLockService {
                 final float aimDist = rawAimWorldDistTo(z);
                 lockScreenDist = aimDist;
                 lockWorldDist = worldDist;
-                if (aimDist > RelaxedAimConfig.lockRadiusWorld * RelaxedAimConfig.reFilterMultiplier) {
+                if (aimDist > RelaxedAimConfig.optionLockRadiusWorld * RelaxedAimConfig.reFilterMultiplier) {
                     pendingReleaseReason = "mouse";
                     return false;
                 }
