@@ -1,0 +1,846 @@
+LOG  : General      f:0> 13-08-2026 19:41:51
+LOG  : General      f:0> SLF4J(I): Attempting to load provider "zombie.core.logger.Slf4jBridge" specified via "slf4j.provider" system property
+LOG  : General      f:0> ===== System specs =====
+LOG  : General      f:0> CPU: AMD Ryzen 5 5600 6-Core Processor              , vendor: AuthenticAMD, cores: 6, threads: 12
+LOG  : General      f:0> RAM: 16310 Mb
+LOG  : General      f:0> Base board: MAG B550M MORTAR (MS-7C94), vendor: Micro-Star International Co., Ltd.
+LOG  : General      f:0> GPU: AMD Radeon RX 6650 XT, vendor: Advanced Micro Devices, Inc., video memory: 8176 Mb, driver: 31.0.24027.1012
+LOG  : General      f:0> Disk info: 137.21 Gb, free space: 22.29 Gb, usable space: 22.29 Gb
+LOG  : General      f:0> OS: Windows 10, version: 10.0, arch: amd64, build: 19045
+LOG  : General      f:0> JVM (free: 158 Mb, max: 15360 Mb, total available: 274 Mb)
+LOG  : General      f:0> ========================
+LOG  : General      f:0> java.specification.version=25
+LOG  : General      f:0> sun.cpu.isalist=amd64
+LOG  : General      f:0> sun.jnu.encoding=GBK
+LOG  : General      f:0> java.vm.vendor=Azul Systems, Inc.
+LOG  : General      f:0> sun.arch.data.model=64
+LOG  : General      f:0> java.vendor.url=http://www.azul.com/
+LOG  : General      f:0> zomboid.steam=1
+LOG  : General      f:0> java.vm.specification.version=25
+LOG  : General      f:0> os.name=Windows 10
+LOG  : General      f:0> zomboid.znetlog=1
+LOG  : General      f:0> slf4j.provider=zombie.core.logger.Slf4jBridge
+LOG  : General      f:0> jdk.debug=release
+LOG  : General      f:0> sun.cpu.endian=little
+LOG  : General      f:0> java.specification.vendor=Oracle Corporation
+LOG  : General      f:0> java.version.date=2025-10-21
+LOG  : General      f:0> java.home=D:\steam\steamapps\common\ProjectZomb...
+LOG  : General      f:0> file.separator=\
+LOG  : General      f:0> line.separator=
+
+LOG  : General      f:0> java.vm.specification.vendor=Oracle Corporation
+LOG  : General      f:0> java.specification.name=Java Platform API Specification
+LOG  : General      f:0> java.awt.headless=true
+LOG  : General      f:0> sun.management.compiler=HotSpot 64-Bit Tiered Compilers
+LOG  : General      f:0> java.runtime.version=25.0.1+8-LTS
+LOG  : General      f:0> stdout.encoding=GBK
+LOG  : General      f:0> os.version=10.0
+LOG  : General      f:0> jna.nosys=false
+LOG  : General      f:0> java.runtime.name=OpenJDK Runtime Environment
+LOG  : General      f:0> file.encoding=UTF-8
+LOG  : General      f:0> java.vm.name=OpenJDK 64-Bit Server VM
+LOG  : General      f:0> java.vendor.version=Zulu25.30+17-CA
+LOG  : General      f:0> jna.loaded=true
+LOG  : General      f:0> java.vendor.url.bug=http://www.azul.com/support/
+LOG  : General      f:0> java.version=25.0.1
+LOG  : General      f:0> os.arch=amd64
+LOG  : General      f:0> java.vm.specification.name=Java Virtual Machine Specification
+LOG  : General      f:0> sun.os.patch.level=
+LOG  : General      f:0> native.encoding=GBK
+LOG  : General      f:0> java.vm.info=mixed mode, sharing
+LOG  : General      f:0> stderr.encoding=GBK
+LOG  : General      f:0> java.vendor=Azul Systems, Inc.
+LOG  : General      f:0> java.vm.version=25.0.1+8-LTS
+LOG  : General      f:0> stdin.encoding=GBK
+LOG  : General      f:0> sun.io.unicode.encoding=UnicodeLittle
+LOG  : General      f:0> java.class.version=69.0
+LOG  : General      f:0> -----
+LOG  : General      f:0> version=42.20.2 ffe7a8a4b1 demo=false
+LOG  : General      f:0> revision=ffe7a8a4b1 pzbullet=1.0.0.28
+LOG  : General      f:0> Logs configuration:
+LOG  : General      f:0>      General: General
+LOG  : General      f:0>      Network: General
+LOG  : General      f:0>          Lua: General
+LOG  : General      f:0>          Mod: General
+LOG  : General      f:0>  Multiplayer: General
+LOG  : General      f:0>      Default: Off
+LOG  : General      f:0> [ZB] patching zombie.GameWindow.init with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: true, inferredTypes: null
+LOG  : General      f:0> [ZB] patching zombie.GameWindow.DoLoadingText with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: false, inferredTypes: [class java.lang.String]
+LOG  : General      f:0> [ZB] Transformed: zombie.GameWindow (new load)
+LOG  : General      f:0> LightingFPS set to 30
+LOG  : General      f:0> [ZB] Running callbacks for onDisplayCreate
+LOG  : General      f:0> [ZB] Running callbacks for onDisplayCreate
+LOG  : General      f:0> Display mode changed to 1280x720 freq=0 fullScreen=false
+LOG  : General      f:0> GraphicsCard: ATI Technologies Inc. AMD Radeon RX 6650 XT
+LOG  : General      f:0> OpenGL version: 4.6.0 Compatibility Profile Context 24.3.1.240312
+LOG  : General      f:0> Desktop resolution 1920x1080
+LOG  : General      f:0> Initial resolution 1280x720 fullScreen=false
+LOG  : General      f:0> OpenGL 1.5 buffer objects supported
+LOG  : General      f:0> VSync: OFF
+LOG  : General      f:0> 1786621313550 fmod: Java loging: OK
+LOG  : General      f:0> 1786621313560 fmod: FMOD::Studio::System::create() result: No errors.
+LOG  : General      f:0> 1786621313561 fmod: FMOD::Studio::System::getCoreSystem() result: No errors.
+LOG  : General      f:0> 1786621313561 fmod: FMOD_System_GetVersion() result: No errors.
+LOG  : General      f:0> 1786621313561 fmod: fmodintegration built with version 20309, fmod shared library version 20309
+LOG  : General      f:0> 1786621313562 fmod: System Create: OK
+LOG  : General      f:0> 1786621313563 fmod: FMOD_System_SetSoftwareFormat() result: No errors.
+LOG  : General      f:0> 1786621313706 fmod: FMOD::Studio::System::Initialize() result: No errors.
+LOG  : General      f:0> 1786621313706 fmod: Creating DSP for capture sound
+LOG  : General      f:0> 1786621313707 fmod: FMOD_System_CreateDSP() result: No errors.
+LOG  : General      f:0> 1786621313707 fmod: FMOD_DSP_SetBypass() result: No errors.
+LOG  : General      f:0> 1786621313708 fmod: FMOD_System_GetMasterChannelGroup() result: No errors.
+LOG  : General      f:0> 1786621313708 fmod: FMOD_ChannelGroup_AddDSP() result: No errors.
+LOG  : General      f:0> 1786621313708 fmod: FMOD_System_Set3DSettings() result: No errors.
+LOG  : Mod          f:0> refusing to list examplemod
+LOG  : General      f:0> Loading networking libraries...
+LOG  : General      f:0> Loading steam_api64...
+LOG  : General      f:0> Loading RakNet64...
+LOG  : General      f:0> Loading ZNetJNI64...
+LOG  : General      f:0> SteamUtils initialised successfully
+LOG  : General      f:0> Loading Mods
+LOG  : Mod          f:0> refusing to list examplemod
+LOG  : General      f:0> [ZB] ZomboidFileSystem.loadMods(7 mods) ...
+LOG  : General      f:0> [ZB] java mod list to load:
+LOG  : General      f:0> [ZB]     me.zed_0xff.zombie_buddy D:\steam\steamapps\workshop\content\108600\3619862853\mods\ZombieBuddy\42\..\libs\ZombieBuddy.jar
+LOG  : General      f:0> [ZB]     com.relaxedaim           C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\RelaxedAim.jar
+LOG  : General      f:0> [ZB] Java mod approvals read from C:\Users\Administrator\.zombie_buddy\mod_approvals.json: 2 mod(s)
+LOG  : General      f:0> [ZB] checking mods ban status
+LOG  : General      f:0> [ZB] ZBS verification valid for D:\steam\steamapps\workshop\content\108600\3619862853\mods\ZombieBuddy\42\..\libs\ZombieBuddy.jar: uploaderID=76561198043849998, shortMessage=, detailedMessage=
+LOG  : General      f:0> Waiting for Java mods approval…
+LOG  : General      f:0> Loading Mods
+LOG  : General      f:0> [ZB] Excluded: D:\steam\steamapps\workshop\content\108600\3619862853\mods\ZombieBuddy\42\mod.info (loaded as Java agent, skipping normal mod loading) (version 2.3.2)
+LOG  : General      f:0> [ZB] java mod list after processing:
+LOG  : General      f:0> [ZB]     com.relaxedaim           C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\RelaxedAim.jar
+LOG  : General      f:0> [ZB] added to classpath: C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\RelaxedAim.jar
+LOG  : General      f:0> [ZB] trying to load com.relaxedaim.Main: null
+LOG  : General      f:0> [ZB] Scanned 3 classes in package com.relaxedaim
+LOG  : General      f:0> [ZB] Found patch class: com.relaxedaim.Patch_IngameState
+LOG  : General      f:0> [ZB] Found patch class: com.relaxedaim.Patch_MainScreenState
+LOG  : General      f:0> [ZB] patching zombie.gameStates.IngameState.renderframeui with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: true, inferredTypes: null
+LOG  : General      f:0> [ZB] Transformed: zombie.gameStates.IngameState (retransformed)
+LOG  : General      f:0> [ZB] patching zombie.gameStates.MainScreenState.renderBackground with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: true, inferredTypes: null
+LOG  : General      f:0> [ZB] Transformed: zombie.gameStates.MainScreenState (retransformed)
+LOG  : General      f:0> [ZB] Explicitly retransforming 1 already-loaded class(es)
+LOG  : General      f:0> [ZB] patching zombie.gameStates.MainScreenState.renderBackground with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: true, inferredTypes: null
+LOG  : General      f:0> [ZB] Transformed: zombie.gameStates.MainScreenState (retransformed)
+LOG  : General      f:0> [ZB] Loader.loadMods() took 7838 ms
+LOG  : Mod          f:0> loading ZombieBuddy
+LOG  : Mod          f:0> mod "ZombieBuddy" overrides media/lua/shared/translate/en/ui.json
+LOG  : Mod          f:0> loading ChuckleberryFinnAlertSystem
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ar/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ca/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ch/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/cn/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/cs/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/da/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/de/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/en/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/es/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/fi/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/fr/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/hu/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/id/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/it/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/jp/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ko/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/nl/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/no/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/pl/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/pt/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ptbr/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ro/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ru/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/th/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/tr/ig_ui.json
+LOG  : Mod          f:0> mod "ChuckleberryFinnAlertSystem" overrides media/lua/shared/translate/ua/ig_ui.json
+LOG  : Mod          f:0> loading ModLoadOrderSorter_b42
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/cn/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/de/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/en/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/es/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/fr/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/it/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/ko/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/pl/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/ptbr/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/ru/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides media/lua/shared/translate/tr/ui.json
+LOG  : Mod          f:0> mod "ModLoadOrderSorter_b42" overrides icon.png
+LOG  : Mod          f:0> loading errorMagnifier
+LOG  : Mod          f:0> mod "errorMagnifier" overrides changelog.txt
+LOG  : Mod          f:0> mod "errorMagnifier" overrides icon.png
+LOG  : Mod          f:0> loading B42Trans_CN
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/fonts/cn/fonts.txt
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/attributes.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/bodyparts.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/brandenburg, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/challenge.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/contextmenu.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/credits.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/credits_translator.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/dynamicradio.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/echo creek, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/ekron, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/entity.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/evolvedrecipename.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/fallas lake, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/farming.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/fluids.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/gamesound.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/ig_ui.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/irvington, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/itemname.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/language.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/makeup.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/maplabel.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/march ridge, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/moodles.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/moveables.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/muldraugh, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/multistagebuild.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/print_media.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/print_text.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/radiodata.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/recipegroups.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/recipes.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/recorded_media.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/riverside, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/rosewood, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/sandbox.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/stash.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/survivalguide.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/survivornames.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/tooltip.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/ui.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/valley station, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/lua/shared/translate/cn/west point, ky.json
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/maps/riverside, ky/
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/maps/riverside, ky/map.info
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/maps/riverside, ky/spawnpoints.lua
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/maps/riverside, ky/thumb.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/a1hay.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/alsautoshop.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/americantire.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/amz.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/bakesale.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/bburgfire.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/beefchunk.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/brenford.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/brott.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/bruiser.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/bunker.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/cardinalplaza.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/carfixation.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/catfishrestaurant.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/cgecorp.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/circuitalhealing.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/coalfield.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/crossroads.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/darkwallow.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/delilah.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/dinerinthewoods.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/dixiecabin.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/dragracing.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ducase.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ekroncc.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/elveearena.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/eptools.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fallaschurch.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/farmersmarket.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/farmingdv.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fashionabelle.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fivealarm.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil1.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil2.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil3.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil4.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil5.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil6.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil7.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoil8.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/fossoilfield.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/gallery.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/gnome.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/goldensunset.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/grandohio.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/greenesekron.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/gunsunlimited.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/havisham.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/highstreetapts.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/hitvids1.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/hobbsperkins.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house787.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house799.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house818.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house845.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house851.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house855.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house860.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house863.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house867.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house891.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house895.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house903.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house907.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house912.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house915.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house919.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house922.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house929.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house930.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house934.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/house943.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/irvingtongunclub.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/july4dixie.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/knoxbank1.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/knoxgunclub.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/knoxpack.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/leafhill.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lectromax.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lennys.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/library.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/loveduet.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lowrycourt.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lsu.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lva.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lvfd.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/lvpd.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/maddansden.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/mailjobekron.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/marchridgeschooljob.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/mccoylogging.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/meadshire.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/muldraughpd.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/musicfest.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/nailsandnuts.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/nolans.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/onyx.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ovofarms.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/pileocrepejob.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/pizzawhirledrosewood.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/pondview.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/readyprep.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/redoak.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/riversidejuly4.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/riversidepd.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/rosewoodfd.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/rosewoodfd2.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/roxy.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/rustyrifle.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/sammies.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/scarletoak.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/seashanty.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/shelterbburg.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/shs.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/sleepeazzze.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/speedway.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/spiffosdixie.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/spiffoslv.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/spiffoswp.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/stuartandlog.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/sunsetpines.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/sunstar.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/surefitness.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/tacodelpancho.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/twiggys.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/upscale.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ustoreit1.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ustoreit2.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/ustoreit3.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/westpointcabin.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/whgc.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/wizardskeep.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/wmcc.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/wpdiy.png
+LOG  : Mod          f:0> mod "B42Trans_CN" overrides media/textures/printmedia/flyerpics/wptownhall.png
+LOG  : Mod          f:0> loading PZ_Debug
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/ch/ig_ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/ch/ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/cn/ig_ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/cn/ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/en/ig_ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/en/ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/ru/ig_ui.json
+LOG  : Mod          f:0> mod "PZ_Debug" overrides media/lua/shared/translate/ru/ui.json
+LOG  : Mod          f:0> loading RelaxedAim
+LOG  : General      f:0> Loading Translations
+LOG  : General      f:0> [ZB] patching zombie.gameStates.GameLoadingState.exit with 1 advice(s)
+LOG  : General      f:0> [ZB] hasMultipleSignatures: false, hasAllArguments: false, hasNoParamMethod: true, inferredTypes: null
+LOG  : General      f:0> [ZB] Transformed: zombie.gameStates.GameLoadingState (new load)
+LOG  : General      f:0> [ZB] Exposing class to Lua: ZombieBuddy
+LOG  : General      f:0> [ZB] Exposing class to Lua: Patch_GameLoadingState as ZombieBuddy.Patches.GameLoadingState
+LOG  : General      f:0> [ZB] Exposing class to Lua: Watermark as ZombieBuddy.Watermark
+LOG  : General      f:0> texturepack: loading UI
+LOG  : General      f:0> 载入 UI 纹理包
+LOG  : General      f:0> texturepack: loading UI2
+LOG  : General      f:0> 载入 UI2 纹理包
+LOG  : General      f:0> texturepack: loading IconsMoveables
+LOG  : General      f:0> 载入 IconsMoveables 纹理包
+LOG  : General      f:0> texturepack: loading RadioIcons
+LOG  : General      f:0> 载入 RadioIcons 纹理包
+LOG  : General      f:0> texturepack: loading ApComUI
+LOG  : General      f:0> 载入 ApComUI 纹理包
+LOG  : General      f:0> texturepack: loading Mechanics
+LOG  : General      f:0> 载入 Mechanics 纹理包
+LOG  : General      f:0> texturepack: loading WeatherFx
+LOG  : General      f:0> 载入 WeatherFx 纹理包
+LOG  : General      f:0> 载入脚本中
+ERROR: General      f:0 at FluidContainerScript.load           > Sanitizing container name 'Large Bucket', name may not contain whitespaces.
+ERROR: General      f:0 at FluidContainerScript.load           > Sanitizing container name 'Fuel Pump', name may not contain whitespaces.
+WARN : General      f:0 at XuiSkin$EntityUiStyle.Load          > Could not find icon: Build_AnvilStone, script = 石砧
+WARN : General      f:0 at XuiSkin$EntityUiStyle.LoadComponentInfo> Could not find icon: Build_AnvilStone
+WARN : General      f:0 at XuiSkin$EntityUiStyle.Load          > Could not find icon: Build_AnvilStone, script = 石砧
+WARN : General      f:0 at XuiSkin$EntityUiStyle.LoadComponentInfo> Could not find icon: Build_AnvilStone
+WARN : General      f:0 at XuiSkin$EntityUiStyle.Load          > Could not find icon: Build_AnvilStone, script = 石砧
+WARN : General      f:0 at XuiSkin$EntityUiStyle.LoadComponentInfo> Could not find icon: Build_AnvilStone
+WARN : General      f:0 at XuiSkin$EntityUiStyle.Load          > Could not find icon: Build_AnvilStone, script = 石砧
+WARN : General      f:0 at XuiSkin$EntityUiStyle.LoadComponentInfo> Could not find icon: Build_AnvilStone
+WARN : General      f:0 at TaggedObjectManager.createTagBits   > manager-> new tag discovered that was not preprocessed, tag: keyduplicator
+WARN : General      f:0 at TaggedObjectManager.createTagBits   > manager-> new tag discovered that was not preprocessed, tag: choppingblock
+LOG  : General      f:0> 载入服装
+LOG  : General      f:0> 
+LOG  : General      f:0> 载入 Lua 脚本中
+WARN : Lua          f:0 at Lua(Vanilla).corpseStorageCheck     > require("ISUI/ISInventoryPaneContextMenu") failed
+WARN : Lua          f:0 at Lua(Vanilla).corpseStorageCheck     > require("ISUI/ISVehicleMenu") failed
+WARN : Lua          f:0 at Lua(Vanilla).corpseStorageCheck     > require("ISUI/ISContextMenu") failed
+WARN : Lua          f:0 at Lua(Vanilla).ISCampingMenu          > require("Camping/CCampfireSystem") failed
+WARN : Lua          f:0 at Lua(Vanilla).ISInventoryTransferUtil> require("TimedActions/ISInventoryTransferAction") failed
+WARN : Lua          f:0 at Lua(Vanilla).ISInventoryTransferUtil> require("ISUI/PlayerData/ISPlayerData") failed
+WARN : Lua          f:0 at Lua(Vanilla).ISAnimalContextMenu    > require("BuildingObjects/ISAnimalPickMateCursor") failed
+WARN : Lua          f:0 at Lua(Vanilla).TakeSameType           > require("ISUI/InventoryWindow/ISLootWindowControlHandler") failed
+WARN : Lua          f:0 at Lua(Vanilla).FloorTakeSameType      > require("ISUI/InventoryWindow/ISLootWindowControlHandler") failed
+WARN : Lua          f:0 at Lua(Vanilla).testUI                 > require("pzapi/ui/ui") failed
+LOG  : Lua          f:0> :	OnLoadSoundbanks
+LOG  : General      f:0> [ZB] Running callbacks for onGameInitComplete
+LOG  : General      f:0> texturepack: loading Tiles2x
+LOG  : General      f:0> 载入 Tiles2x 纹理包
+LOG  : General      f:0> texturepack: loading Overlays2x
+LOG  : General      f:0> 载入 Overlays2x 纹理包
+LOG  : General      f:0> texturepack: loading JumboTrees2x
+LOG  : General      f:0> 载入 JumboTrees2x 纹理包
+LOG  : General      f:0> texturepack: loading JumboTreesBigs2x
+LOG  : General      f:0> 载入 JumboTreesBigs2x 纹理包
+LOG  : General      f:0> texturepack: loading Tiles2x.floor
+LOG  : General      f:0> 载入 Tiles2x.floor 纹理包
+LOG  : General      f:0> texturepack: loading B42ChunkCaching2x
+LOG  : General      f:0> 载入 B42ChunkCaching2x 纹理包
+LOG  : General      f:0> texturepack: loading B42ChunkCaching2x.floor
+LOG  : General      f:0> 载入 B42ChunkCaching2x.floor 纹理包
+LOG  : General      f:0> texturepack: loading Clock2x
+LOG  : General      f:0> 载入 Clock2x 纹理包
+LOG  : General      f:0> 加载模型和动画
+LOG  : General      f:0> 1786621355627 fmod: globalSystem = 0xF5FC538
+LOG  : General      f:0> 1786621355628 fmod: FMOD_System_GetRecordDriverInfo: nativeRate = 48000, nativeChannels = 1
+LOG  : General      f:0> 1786621355629 fmod: System create record sound: OK
+LOG  : General      f:0> 1786621355629 fmod: Create resampler: OK
+LOG  : General      f:0> 1786621355630 fmod: Create acoustic echo canceller: OK
+LOG  : General      f:0> 1786621355665 fmod: GetRecordNumDrivers id = 0, sound = 0x3a94e1b8 loop=1
+LOG  : General      f:0> 游戏启动中
+LOG  : General      f:0> STATE: exit zombie.gameStates.TISLogoState
+LOG  : General      f:0> STATE: exit zombie.gameStates.TermsOfServiceState
+LOG  : General      f:0> binkId: 1
+WARN : Lua          f:0 at Lua(Vanilla).namedColorToTable      > env.lua-> namedColorToTable color not found: ProgressYellow
+LOG  : Lua          f:0> :	[ZombieBuddy] ZombieBuddy.getVersion() = 2.3.2
+LOG  : General      f:0> binkId: 2
+LOG  : General      f:0> [RelaxedAim] RelaxedAim loaded
+LOG  : General      f:0> STATE: exit zombie.gameStates.MainScreenState
+LOG  : General      f:0> LOADED UP A TOTAL OF 2204 TEXTURES
+LOG  : General      f:0> STATE: exit zombie.gameStates.LoadingQueueState
+LOG  : Lua          f:0> :	Initializing Randomized World Tabletop Clutter Tables
+WARN : Lua          f:0 at Lua(Vanilla).Features               > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/WorldGen.lua
+WARN : Lua          f:0 at Lua(Vanilla).Biomes                 > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/WorldGen.lua
+WARN : Lua          f:0 at Lua(Vanilla).Selection              > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/WorldGen.lua
+WARN : Lua          f:0 at Lua(Vanilla).Veins                  > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/WorldGen.lua
+WARN : Lua          f:0 at Lua(Vanilla).Roads                  > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/WorldGen.lua
+WARN : Lua          f:0 at Lua(Vanilla).WorldGen               > recursive require(): D:/steam/steamapps/common/ProjectZomboid/media/lua/server/WorldGen/attachments/Priorities.lua
+ERROR: General      f:0 at CraftRecipeComponentScript.getIconTexture> CraftRecipeComponentScript: Recipe Piano missing UiConfigScript - falling back to SpriteConfigScript first world object face for recipe icon.
+LOG  : General      f:0> SafeMode is off
+LOG  : General      f:0> Loading worldgen params
+LOG  : General      f:0> IsoMetaGrid.Create: begin scanning directories
+LOG  : General      f:0> Looking in these map folders:
+LOG  : General      f:0> <End of map-folders list>
+LOG  : General      f:0> IsoMetaGrid.Create: X: [ -250 250 ], Y: [ -250 250 ]
+LOG  : General      f:0> World seed: eZkiCoUVzCnfJwXB 1781480056
+LOG  : General      f:0> IsoMetaGrid.Create: finished scanning directories in 0.25 seconds
+LOG  : General      f:0> IsoMetaGrid.Create: begin loading
+LOG  : General      f:0> VehiclesDB2.init() start
+LOG  : General      f:0> VehiclesDB2.init() end
+LOG  : General      f:0> triggerEvent OnInitWorld
+LOG  : General      f:0> SandboxOptions.load() start
+LOG  : General      f:0> SandboxOptions.load() end
+LOG  : General      f:0> ItemPickerJava.Parse() start
+LOG  : General      f:0> ItemPickerJava.Parse() end
+LOG  : General      f:0> LoadTileDefinitions start
+LOG  : General      f:0> LoadTileDefinitions end
+LOG  : General      f:0> triggerEvent OnLoadedTileDefinitions
+LOG  : General      f:0> loadAnimalDefinitions start
+LOG  : General      f:0> loadAnimalDefinitions end
+LOG  : General      f:0> GameTime.init() and load() start
+LOG  : General      f:0> GameTime.init() and load() end
+LOG  : General      f:0> ZomboidRadio.Init() start
+LOG  : General      f:0> Attempting to load translation: CN
+LOG  : Lua          f:0> :	scriptmanager = zombie.radio.scripting.RadioScriptManager@3fcfad5b, isNewGame = false
+LOG  : Lua          f:0> :	name = Automated Emergency Broadcast System, freq = 92600, cat = Emergency, uuid = EMRG-711984
+LOG  : General      f:0> Radio Loading channels...
+LOG  : General      f:0> ZomboidRadio.Init() end
+LOG  : General      f:0> GlobalModData.init() start
+LOG  : General      f:0> GlobalModData.init() end
+LOG  : General      f:0> InstanceTracker.load() start
+LOG  : General      f:0> InstanceTracker.load() end
+LOG  : General      f:0> ErosionGlobals.Boot() start
+LOG  : General      f:0> ErosionGlobals.Boot() end
+LOG  : General      f:0> WorldDictionary.init() start
+LOG  : General      f:0> WorldDictionary: Checking dictionary...
+LOG  : General      f:0> Loading WorldDictionary:C:\Users\Administrator\Zomboid\Saves\Sandbox\2026-08-13_10-28-45\WorldDictionary.bin
+LOG  : General      f:0> WorldDictionary.init() end
+LOG  : General      f:0> GameEntityManager.Init() start
+LOG  : General      f:0> GameEntityManager.Init() end
+LOG  : General      f:0> PersistentOutfits.init() start
+LOG  : General      f:0> PersistentOutfits.init() end
+LOG  : General      f:0> IsoMetaGrid.Create: finished loading in 27.107 seconds
+ERROR: Lua          f:0 at Lua(Vanilla).handleMannequinZone    > ERROR: Mannequin zone missing properties in media/maps/Muldraugh, KY/objects.lua coords: 13583, 1299, 0
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/West Point, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Valley Station, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Rosewood, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Riverside, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/March Ridge, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Irvington, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Fallas Lake, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Ekron, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Echo Creek, KY/objects.lua
+WARN : Lua          f:0 at Lua(Vanilla).doMapZones             > can't find map objects file: media/maps/Brandenburg, KY/objects.lua
+ERROR: General      f:0 at Basements.mergeRoomsOntoMetaCell    > duplicate RoomDef.metaID for room at 10707,9484,0
+ERROR: General      f:0 at IsoMetaGrid.load                    > invalid room metaID #231 in cell 25,33 while reading map_meta.bin
+ERROR: General      f:0 at IsoMetaGrid.load                    > invalid room metaID #327914 in cell 25,33 while reading map_meta.bin
+ERROR: General      f:0 at IsoMetaGrid.load                    > invalid room metaID #327911 in cell 25,33 while reading map_meta.bin
+ERROR: General      f:0 at IsoMetaGrid.load                    > invalid room metaID #655594 in cell 25,33 while reading map_meta.bin
+LOG  : General      f:0> loading 8811 zones from map_zone.bin
+LOG  : General      f:0> loading 121 zones from map_animals.bin
+LOG  : General      f:0> Max #ZONES on one chunk is 27
+LOG  : General      f:0> triggerEvent OnLoadedMapZones
+LOG  : General      f:0> ItemConfigurator.Preprocess() start
+LOG  : General      f:0> ItemConfigurator.Preprocess() end
+LOG  : General      f:0> MapCollisionData.init() start
+LOG  : General      f:0> MapCollisionData.init() end
+LOG  : General      f:0> AnimalPopulationManager.init() start
+LOG  : General      f:0> AnimalPopulationManager.init() end
+LOG  : General      f:0> ZombiePopulationManager.init() start
+LOG  : General      f:0> ZombiePopulationManager.init() end
+LOG  : General      f:0> Pathfind init() start
+LOG  : General      f:0> Pathfind init() end
+LOG  : General      f:0> WorldStreamer.create() start
+LOG  : General      f:0> WorldStreamer.create() end
+LOG  : General      f:0> CellLoader.LoadCellBinaryChunk start
+LOG  : General      f:0> CellLoader.LoadCellBinaryChunk start
+LOG  : General      f:0> MapItem.LoadWorldMap() start
+LOG  : General      f:0> MapItem.LoadWorldMap() start
+LOG  : General      f:0> WorldStreamer.isBusy() loop start
+LOG  : General      f:0> WorldStreamer.isBusy() loop end
+LOG  : General      f:0> MetaTracker.load() start
+LOG  : General      f:0> MetaTracker.load() end
+LOG  : General      f:0> triggerEvent OnGameTimeLoaded
+LOG  : General      f:0> GlobalObjects.initSystems() start
+LOG  : General      f:0> GlobalObjects.initSystems() end
+LOG  : General      f:0> bWaitForAssetLoadingToFinish2 start
+LOG  : General      f:0> bWaitForAssetLoadingToFinish2 end
+LOG  : General      f:0> FBORenderChunkManager.gameLoaded() start
+LOG  : General      f:0> FBORenderChunkManager.gameLoaded() end
+LOG  : General      f:0> Bullet.initPhysicsMeshes() start
+LOG  : General      f:0> Bullet.initPhysicsMeshes() end
+LOG  : General      f:0> game loading took 59 seconds
+LOG  : General      f:0> STATE: exit zombie.gameStates.GameLoadingState
+LOG  : Lua          f:0> :	1 players found
+LOG  : Lua          f:0> :	player 0 is mouse
+LOG  : General      f:0> Game Mode: Sandbox
+LOG  : General      f:0> Sandbox Options:
+LOG  : General      f:0> Zombies 4
+LOG  : General      f:0> Distribution 1
+LOG  : General      f:0> ZombieVoronoiNoise true
+LOG  : General      f:0> ZombieRespawn 4
+LOG  : General      f:0> ZombieMigrate true
+LOG  : General      f:0> DayLength 4
+LOG  : General      f:0> StartYear 1
+LOG  : General      f:0> StartMonth 7
+LOG  : General      f:0> StartDay 9
+LOG  : General      f:0> StartTime 2
+LOG  : General      f:0> DayNightCycle 1
+LOG  : General      f:0> ClimateCycle 1
+LOG  : General      f:0> FogCycle 1
+LOG  : General      f:0> WaterShut 2
+LOG  : General      f:0> ElecShut 2
+LOG  : General      f:0> AlarmDecay 2
+LOG  : General      f:0> WaterShutModifier 16
+LOG  : General      f:0> ElecShutModifier 17
+LOG  : General      f:0> AlarmDecayModifier 14
+LOG  : General      f:0> FoodLootNew 0.8
+LOG  : General      f:0> LiteratureLootNew 0.6
+LOG  : General      f:0> SkillBookLoot 0.6
+LOG  : General      f:0> RecipeResourceLoot 0.6
+LOG  : General      f:0> MedicalLootNew 0.6
+LOG  : General      f:0> SurvivalGearsLootNew 0.6
+LOG  : General      f:0> CannedFoodLootNew 0.6
+LOG  : General      f:0> WeaponLootNew 0.6
+LOG  : General      f:0> RangedWeaponLootNew 1.2
+LOG  : General      f:0> AmmoLootNew 0.6
+LOG  : General      f:0> MechanicsLootNew 0.6
+LOG  : General      f:0> OtherLootNew 0.8
+LOG  : General      f:0> ClothingLootNew 0.6
+LOG  : General      f:0> ContainerLootNew 0.6
+LOG  : General      f:0> KeyLootNew 0.4
+LOG  : General      f:0> MediaLootNew 0.6
+LOG  : General      f:0> MementoLootNew 0.6
+LOG  : General      f:0> CookwareLootNew 0.6
+LOG  : General      f:0> MaterialLootNew 0.6
+LOG  : General      f:0> FarmingLootNew 0.6
+LOG  : General      f:0> ToolLootNew 0.6
+LOG  : General      f:0> RollsMultiplier 1.0
+LOG  : General      f:0> LootItemRemovalList 
+LOG  : General      f:0> RemoveStoryLoot false
+LOG  : General      f:0> RemoveZombieLoot false
+LOG  : General      f:0> ZombiePopLootEffect 0
+LOG  : General      f:0> InsaneLootFactor 0.05
+LOG  : General      f:0> ExtremeLootFactor 0.2
+LOG  : General      f:0> RareLootFactor 0.6
+LOG  : General      f:0> NormalLootFactor 1.0
+LOG  : General      f:0> CommonLootFactor 2.0
+LOG  : General      f:0> AbundantLootFactor 3.0
+LOG  : General      f:0> Temperature 3
+LOG  : General      f:0> Rain 3
+LOG  : General      f:0> ErosionSpeed 4
+LOG  : General      f:0> ErosionDays 0
+LOG  : General      f:0> Farming 3
+LOG  : General      f:0> CompostTime 2
+LOG  : General      f:0> StatsDecrease 3
+LOG  : General      f:0> NatureAbundance 3
+LOG  : General      f:0> Alarm 4
+LOG  : General      f:0> LockedHouses 6
+LOG  : General      f:0> StarterKit false
+LOG  : General      f:0> Nutrition true
+LOG  : General      f:0> FoodRotSpeed 3
+LOG  : General      f:0> FridgeFactor 3
+LOG  : General      f:0> SeenHoursPreventLootRespawn 0
+LOG  : General      f:0> HoursForLootRespawn 0
+LOG  : General      f:0> MaxItemsForLootRespawn 5
+LOG  : General      f:0> ConstructionPreventsLootRespawn true
+LOG  : General      f:0> WorldItemRemovalList Base.Hat, Base.Glasses, Base.Maggots, Base.Slug, Base.Slug2, Base.Snail, Base.Worm, Base.Dung_Mouse, Base.Dung_Rat
+LOG  : General      f:0> HoursForWorldItemRemoval 24.0
+LOG  : General      f:0> ItemRemovalListBlacklistToggle false
+LOG  : General      f:0> TimeSinceApo 1
+LOG  : General      f:0> PlantResilience 3
+LOG  : General      f:0> PlantAbundance 3
+LOG  : General      f:0> EndRegen 3
+LOG  : General      f:0> Helicopter 2
+LOG  : General      f:0> MetaEvent 2
+LOG  : General      f:0> SleepingEvent 1
+LOG  : General      f:0> GeneratorFuelConsumption 0.1
+LOG  : General      f:0> GeneratorSpawning 4
+LOG  : General      f:0> AnnotatedMapChance 4
+LOG  : General      f:0> CharacterFreePoints 0
+LOG  : General      f:0> ConstructionBonusPoints 3
+LOG  : General      f:0> NightDarkness 3
+LOG  : General      f:0> NightLength 3
+LOG  : General      f:0> BoneFracture true
+LOG  : General      f:0> InjurySeverity 2
+LOG  : General      f:0> HoursForCorpseRemoval 216.0
+LOG  : General      f:0> DecayingCorpseHealthImpact 3
+LOG  : General      f:0> ZombieHealthImpact false
+LOG  : General      f:0> BloodLevel 3
+LOG  : General      f:0> ClothingDegradation 3
+LOG  : General      f:0> FireSpread true
+LOG  : General      f:0> DaysForRottenFoodRemoval -1
+LOG  : General      f:0> AllowExteriorGenerator true
+LOG  : General      f:0> MaxFogIntensity 1
+LOG  : General      f:0> MaxRainFxIntensity 1
+LOG  : General      f:0> EnableSnowOnGround true
+LOG  : General      f:0> AttackBlockMovements true
+LOG  : General      f:0> SurvivorHouseChance 3
+LOG  : General      f:0> VehicleStoryChance 3
+LOG  : General      f:0> ZoneStoryChance 3
+LOG  : General      f:0> AllClothesUnlocked false
+LOG  : General      f:0> EnableTaintedWaterText true
+LOG  : General      f:0> EnableVehicles true
+LOG  : General      f:0> CarSpawnRate 3
+LOG  : General      f:0> ZombieAttractionMultiplier 1.0
+LOG  : General      f:0> VehicleEasyUse false
+LOG  : General      f:0> InitialGas 2
+LOG  : General      f:0> FuelStationGasInfinite false
+LOG  : General      f:0> FuelStationGasMin 0.0
+LOG  : General      f:0> FuelStationGasMax 0.8
+LOG  : General      f:0> FuelStationGasEmptyChance 20
+LOG  : General      f:0> LockedCar 4
+LOG  : General      f:0> CarGasConsumption 1.0
+LOG  : General      f:0> CarGeneralCondition 3
+LOG  : General      f:0> CarDamageOnImpact 3
+LOG  : General      f:0> DamageToPlayerFromHitByACar 1
+LOG  : General      f:0> TrafficJam true
+LOG  : General      f:0> CarAlarm 3
+LOG  : General      f:0> PlayerDamageFromCrash true
+LOG  : General      f:0> SirenShutoffHours 0.0
+LOG  : General      f:0> ChanceHasGas 2
+LOG  : General      f:0> RecentlySurvivorVehicles 2
+LOG  : General      f:0> MultiHitZombies false
+LOG  : General      f:0> RearVulnerability 3
+LOG  : General      f:0> SirenEffectsZombies true
+LOG  : General      f:0> AnimalStatsModifier 4
+LOG  : General      f:0> AnimalMetaStatsModifier 4
+LOG  : General      f:0> AnimalPregnancyTime 4
+LOG  : General      f:0> AnimalAgeModifier 4
+LOG  : General      f:0> AnimalMilkIncModifier 4
+LOG  : General      f:0> AnimalWoolIncModifier 4
+LOG  : General      f:0> AnimalRanchChance 5
+LOG  : General      f:0> AnimalGrassRegrowTime 240
+LOG  : General      f:0> AnimalMetaPredator false
+LOG  : General      f:0> AnimalMatingSeason true
+LOG  : General      f:0> AnimalEggHatch 4
+LOG  : General      f:0> AnimalSoundAttractZombies true
+LOG  : General      f:0> AnimalTrackChance 4
+LOG  : General      f:0> AnimalPathChance 4
+LOG  : General      f:0> MaximumRatIndex 25
+LOG  : General      f:0> DaysUntilMaximumRatIndex 90
+LOG  : General      f:0> MetaKnowledge 3
+LOG  : General      f:0> SeeNotLearntRecipe true
+LOG  : General      f:0> MaximumLootedBuildingRooms 50
+LOG  : General      f:0> EnablePoisoning 1
+LOG  : General      f:0> MaggotSpawn 1
+LOG  : General      f:0> LightBulbLifespan 2.0
+LOG  : General      f:0> FishAbundance 2
+LOG  : General      f:0> LevelForMediaXPCutoff 3
+LOG  : General      f:0> LevelForDismantleXPCutoff 0
+LOG  : General      f:0> BloodSplatLifespanDays 0
+LOG  : General      f:0> LiteratureCooldown 45
+LOG  : General      f:0> NegativeTraitsPenalty 1
+LOG  : General      f:0> MinutesPerPage 2.0
+LOG  : General      f:0> KillInsideCrops true
+LOG  : General      f:0> PlantGrowingSeasons true
+LOG  : General      f:0> PlaceDirtAboveground false
+LOG  : General      f:0> FarmingSpeedNew 1.0
+LOG  : General      f:0> FarmingAmountNew 1.0
+LOG  : General      f:0> MaximumLooted 25
+LOG  : General      f:0> DaysUntilMaximumLooted 90
+LOG  : General      f:0> RuralLooted 0.5
+LOG  : General      f:0> MaximumDiminishedLoot 20
+LOG  : General      f:0> DaysUntilMaximumDiminishedLoot 3650
+LOG  : General      f:0> MuscleStrainFactor 0.7
+LOG  : General      f:0> DiscomfortFactor 0.8
+LOG  : General      f:0> WoundInfectionFactor 1.0
+LOG  : General      f:0> NoBlackClothes true
+LOG  : General      f:0> EasyClimbing false
+LOG  : General      f:0> MaximumFireFuelHours 8
+LOG  : General      f:0> FirearmUseDamageChance 2
+LOG  : General      f:0> FirearmNoiseMultiplier 1.0
+LOG  : General      f:0> FirearmJamMultiplier 1.0
+LOG  : General      f:0> FirearmMoodleMultiplier 1.0
+LOG  : General      f:0> FirearmWeatherMultiplier 1.0
+LOG  : General      f:0> FirearmHeadGearEffect true
+LOG  : General      f:0> ClayLakeChance 0.05
+LOG  : General      f:0> ClayRiverChance 0.05
+LOG  : General      f:0> GeneratorTileRange 20
+LOG  : General      f:0> GeneratorVerticalPowerRange 3
+LOG  : General      f:0> SpawnFrequency 4
+LOG  : General      f:0> AllowMiniMap false
+LOG  : General      f:0> AllowWorldMap true
+LOG  : General      f:0> MapAllKnown false
+LOG  : General      f:0> MapNeedsLight true
+LOG  : General      f:0> Speed 1
+LOG  : General      f:0> SprinterPercentage 0
+LOG  : General      f:0> Strength 2
+LOG  : General      f:0> Toughness 4
+LOG  : General      f:0> Transmission 1
+LOG  : General      f:0> Mortality 5
+LOG  : General      f:0> Reanimate 3
+LOG  : General      f:0> Cognition 3
+LOG  : General      f:0> DoorOpeningPercentage 0
+LOG  : General      f:0> CrawlUnderVehicle 5
+LOG  : General      f:0> Memory 2
+LOG  : General      f:0> Sight 5
+LOG  : General      f:0> Hearing 5
+LOG  : General      f:0> SpottedLogic true
+LOG  : General      f:0> ThumpNoChasing false
+LOG  : General      f:0> ThumpOnConstruction true
+LOG  : General      f:0> ActiveOnly 1
+LOG  : General      f:0> TriggerHouseAlarm true
+LOG  : General      f:0> ZombiesDragDown true
+LOG  : General      f:0> ZombiesCrawlersDragDown false
+LOG  : General      f:0> ZombiesFenceLunge true
+LOG  : General      f:0> ZombiesArmorFactor 2.0
+LOG  : General      f:0> ZombiesMaxDefense 85
+LOG  : General      f:0> ChanceOfAttachedWeapon 6
+LOG  : General      f:0> ZombiesFallDamage 1.0
+LOG  : General      f:0> DisableFakeDead 1
+LOG  : General      f:0> PlayerSpawnZombieRemoval 1
+LOG  : General      f:0> FenceThumpersRequired 25
+LOG  : General      f:0> FenceDamageMultiplier 1.0
+LOG  : General      f:0> PopulationMultiplier 0.65
+LOG  : General      f:0> PopulationStartMultiplier 1.0
+LOG  : General      f:0> PopulationPeakMultiplier 1.5
+LOG  : General      f:0> PopulationPeakDay 28
+LOG  : General      f:0> RespawnHours 0.0
+LOG  : General      f:0> RespawnUnseenHours 0.0
+LOG  : General      f:0> RespawnMultiplier 0.0
+LOG  : General      f:0> RedistributeHours 12.0
+LOG  : General      f:0> FollowSoundDistance 100
+LOG  : General      f:0> RallyGroupSize 20
+LOG  : General      f:0> RallyGroupSizeVariance 50
+LOG  : General      f:0> RallyTravelDistance 20
+LOG  : General      f:0> RallyGroupSeparation 15
+LOG  : General      f:0> RallyGroupRadius 3
+LOG  : General      f:0> ZombiesCountBeforeDelete 300
+LOG  : General      f:0> Global 1.0
+LOG  : General      f:0> GlobalToggle true
+LOG  : General      f:0> Fitness 1.0
+LOG  : General      f:0> Strength 1.0
+LOG  : General      f:0> Sprinting 1.0
+LOG  : General      f:0> Lightfoot 1.0
+LOG  : General      f:0> Nimble 1.0
+LOG  : General      f:0> Sneak 1.0
+LOG  : General      f:0> Axe 1.0
+LOG  : General      f:0> Blunt 1.0
+LOG  : General      f:0> SmallBlunt 1.0
+LOG  : General      f:0> LongBlade 1.0
+LOG  : General      f:0> SmallBlade 1.0
+LOG  : General      f:0> Spear 1.0
+LOG  : General      f:0> Maintenance 1.0
+LOG  : General      f:0> Woodwork 1.0
+LOG  : General      f:0> Cooking 1.0
+LOG  : General      f:0> Farming 1.0
+LOG  : General      f:0> Doctor 1.0
+LOG  : General      f:0> Electricity 1.0
+LOG  : General      f:0> MetalWelding 1.0
+LOG  : General      f:0> Mechanics 1.0
+LOG  : General      f:0> Tailoring 1.0
+LOG  : General      f:0> Aiming 1.0
+LOG  : General      f:0> Reloading 1.0
+LOG  : General      f:0> Fishing 1.0
+LOG  : General      f:0> Trapping 1.0
+LOG  : General      f:0> PlantScavenging 1.0
+LOG  : General      f:0> FlintKnapping 1.0
+LOG  : General      f:0> Masonry 1.0
+LOG  : General      f:0> Pottery 1.0
+LOG  : General      f:0> Carving 1.0
+LOG  : General      f:0> Husbandry 1.0
+LOG  : General      f:0> Tracking 1.0
+LOG  : General      f:0> Blacksmith 1.0
+LOG  : General      f:0> Butchering 1.0
+LOG  : General      f:0> Glassmaking 1.0
+LOG  : General      f:0> binkId: 3
+LOG  : General      f:332> [RelaxedAim] Phase2 active=true, candidates=0
+LOG  : General      f:490> [RelaxedAim] Phase2 active=false, candidates=0
+LOG  : General      f:1163> [RelaxedAim] Phase2 active=true, candidates=0
+LOG  : General      f:1292> [RelaxedAim] Phase2 active=false, candidates=0
+LOG  : General      f:1941> ItemPickInfo -> cannot get ID for container: inventoryfemale
+LOG  : General      f:2441> [RelaxedAim] Phase2 active=true, candidates=0
+LOG  : General      f:2561> [RelaxedAim] Phase2 active=false, candidates=0
+LOG  : General      f:5328> [RelaxedAim] Phase2 active=true, candidates=0
+LOG  : General      f:5640> [RelaxedAim] Phase2 active=false, candidates=0
+LOG  : General      f:5758> Saving worldgen params
+LOG  : General      f:5758> Saving GlobalModData
+LOG  : Lua          f:5758> :	removing all player data
+LOG  : Lua          f:5758> :	- player: 0
+LOG  : Lua          f:5758> :	removing all player data
+LOG  : Lua          f:5758> :	- player: 0
+LOG  : General      f:5758> GameThread exited.

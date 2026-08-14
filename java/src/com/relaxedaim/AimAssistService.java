@@ -2,10 +2,9 @@ package com.relaxedaim;
 
 import java.util.ArrayList;
 import java.util.List;
-import zombie.characters.IsoGameCharacter;
+
 import zombie.characters.IsoPlayer;
 import zombie.characters.IsoZombie;
-import zombie.input.Mouse;
 import zombie.inventory.InventoryItem;
 import zombie.inventory.types.HandWeapon;
 import zombie.iso.IsoCell;
@@ -13,46 +12,20 @@ import zombie.iso.IsoUtils;
 import zombie.iso.IsoWorld;
 
 /**
- * Phase 2: read-only aim-state collector and candidate zombie detector.
+ * Phase 2 + Phase 3: 只读瞄准状态采集、候选丧尸侦测与目标锁定。
  *
- * <p>This service runs once per frame but only performs the relatively expensive
- * zombie scan every {@link #UPDATE_INTERVAL_FRAMES} frames. It never modifies
- * aiming, shooting, damage or movement. Its only job is to answer:
- * <ul>
- *   <li>Is the local player currently aiming with a ranged weapon?</li>
- *   <li>Which zombies near the mouse are valid targets?</li>
- *   <li>Which one of them is the best candidate right now?</li>
- * </ul>
+ * VERSION: Lock-v1.0 - 引入 TargetLockService 滞回式锁定与鼠标筛选范围
  */
 public final class AimAssistService {
 
-    /** Scan for targets every N frames to keep the per-frame cost low in hordes. */
-    private static final int UPDATE_INTERVAL_FRAMES = 5;
+    public static final float MAX_WORLD_SCAN_RADIUS_TILES = 60.0f;
+    public static final float FLOOR_TOLERANCE = 0.5f;
 
-    /** Do not scan zombies further away than this many tiles. */
-    private static final float MAX_WORLD_SCAN_RADIUS_TILES = 20.0f;
-
-    /** Zombies must be on roughly the same floor as the player. */
-    private static final float FLOOR_TOLERANCE = 0.5f;
-
-    /** Only consider zombies within this many screen pixels of the mouse cursor. */
-    private static final float MOUSE_SEARCH_RADIUS_PIXELS = 500.0f;
-
-    /** World distance has a lower weight than mouse distance when scoring candidates. */
-    private static final float WORLD_DISTANCE_WEIGHT = 5.0f;
-
-    /** Frames elapsed since the mod was loaded. Used for throttling, not for game timing. */
     private static int frameCounter = 0;
-
-    /** Last frame at which we printed a debug log line. */
     private static int lastLogFrame = 0;
+    private static final int LOG_INTERVAL_FRAMES = 30;
 
-    /** Minimum number of frames between two debug log lines. */
-    private static final int LOG_INTERVAL_FRAMES = 120;
-
-    // -------------------------------------------------------------------------
-    // Debug state exposed to the overlay. These are updated every scan frame.
-    // -------------------------------------------------------------------------
+    // Debug state（用于外部访问）
     public static boolean debugIsAiming = false;
     public static boolean debugHasRangedWeapon = false;
     public static String debugWeaponName = "-";
@@ -61,15 +34,7 @@ public final class AimAssistService {
     public static int debugMouseY = 0;
     public static float debugPlayerZ = 0.0f;
     public static int debugTotalZombies = 0;
-    public static int debugRejectedFloor = 0;
-    public static int debugRejectedRange = 0;
-    public static int debugRejectedVisibility = 0;
-    public static int debugRejectedMouse = 0;
     public static int debugCandidateCount = 0;
-    public static String debugNearestZombie = "-";
-    public static float debugNearestDistance = Float.MAX_VALUE;
-    public static float debugNearestScreenX = 0.0f;
-    public static float debugNearestScreenY = 0.0f;
 
     private static boolean lastActive = false;
     private static int lastCandidateCount = 0;
@@ -77,60 +42,114 @@ public final class AimAssistService {
     private AimAssistService() {
     }
 
-    /** Called from the IngameState UI render patch once per frame. */
-    public static void update() {
+    public static boolean isReady() {
+        return true;
+    }
+
+    public static void markNotAiming() {
+        debugIsAiming = false;
+        debugCandidateCount = 0;
+        TargetLockService.clearLock();
+    }
+
+    /**
+     * 只在玩家瞄准时调用的更新方法
+     *
+     * @param player 玩家实例（已确认非null）
+     * @param mouseX 鼠标X坐标
+     * @param mouseY 鼠标Y坐标
+     * @param playerX 玩家X坐标
+     * @param playerY 玩家Y坐标
+     * @param playerZ 玩家Z坐标
+     */
+    public static void updateAiming(IsoPlayer player, int mouseX, int mouseY,
+                                     float playerX, float playerY, float playerZ) {
         frameCounter++;
 
-        // Reset per-frame debug values that are always refreshed.
-        debugMouseX = Mouse.getX();
-        debugMouseY = Mouse.getY();
-        debugIsAiming = false;
-        debugHasRangedWeapon = false;
-        debugWeaponName = "-";
-        debugWeaponRange = 0.0f;
+        // 更新调试状态
+        debugMouseX = mouseX;
+        debugMouseY = mouseY;
+        debugPlayerZ = playerZ;
+        debugIsAiming = true;
 
-        if (!IsoPlayer.hasInstance()) {
-            debugLog(false, 0);
+        // 【安全检查1】确保游戏世界实例存在
+        if (IsoWorld.instance == null) {
+            System.out.println("[RelaxedAim DEBUG] IsoWorld.instance is null");
             return;
         }
 
-        final IsoPlayer player = IsoPlayer.getInstance();
-        debugPlayerZ = player.getZ();
-        debugIsAiming = player.isAiming();
+        // 【安全检查2】确保当前单元格已加载
+        final IsoCell cell = IsoWorld.instance.currentCell;
+        if (cell == null) {
+            System.out.println("[RelaxedAim DEBUG] currentCell is null");
+            return;
+        }
 
-        final HandWeapon weapon = getActiveWeapon(player);
+        // 【安全检查3】确保丧尸列表可用
+        final ArrayList<IsoZombie> zombies;
+        try {
+            zombies = cell.getZombieList();
+            if (zombies == null) {
+                System.out.println("[RelaxedAim DEBUG] Zombie list is null");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("[RelaxedAim DEBUG] Exception getting zombie list: " + e.getMessage());
+            return;
+        }
+
+        // 【安全检查4】获取武器信息
+        final HandWeapon weapon;
+        try {
+            weapon = getActiveWeapon(player);
+        } catch (Exception e) {
+            System.out.println("[RelaxedAim DEBUG] Exception getting weapon: " + e.getMessage());
+            return;
+        }
+
         if (weapon != null) {
             debugHasRangedWeapon = weapon.isRanged();
-            debugWeaponName = weapon.getName() != null ? weapon.getName() : "?";
+            try {
+                debugWeaponName = weapon.getName();
+            } catch (Exception e) {
+                debugWeaponName = "?";
+            }
             debugWeaponRange = weapon.getMaxRange();
-        }
-
-        if (player == null || !player.isAiming()) {
-            debugLog(false, 0);
-            return;
+        } else {
+            debugWeaponName = "-";
+            debugHasRangedWeapon = false;
+            debugWeaponRange = 0.0f;
         }
 
         if (weapon == null || !weapon.isRanged()) {
-            debugLog(false, 0);
+            TargetLockService.clearLock();
             return;
         }
 
-        if (frameCounter % UPDATE_INTERVAL_FRAMES == 0) {
-            final List<IsoZombie> candidates = findCandidates(player, weapon);
-            final IsoZombie best = pickBestCandidate(candidates, player);
+        final int pIndex = getPlayerIndex();
+
+        // 节流搜索帧：重新扫描候选集合
+        List<IsoZombie> candidates = null;
+        if (frameCounter % RelaxedAimConfig.searchIntervalFrames == 0) {
+            System.out.println("[RelaxedAim DEBUG] === Frame " + frameCounter + " (AIMING) ===");
+            System.out.println("[RelaxedAim DEBUG] Mouse: (" + mouseX + ", " + mouseY + ")");
+            System.out.println("[RelaxedAim DEBUG] Player pos: (" + playerX + ", " + playerY + ", " + playerZ + ")");
+            System.out.println("[RelaxedAim DEBUG] Weapon: " + debugWeaponName + ", ranged: " + debugHasRangedWeapon + ", range: " + debugWeaponRange);
+            System.out.println("[RelaxedAim DEBUG] LockRadius: " + RelaxedAimConfig.lockRadiusPx
+                    + "px, reFilter x" + RelaxedAimConfig.reFilterMultiplier);
+            System.out.println("[RelaxedAim DEBUG] === Starting zombie scan ===");
+            candidates = findCandidates(player, weapon, zombies, pIndex, mouseX, mouseY);
             debugCandidateCount = candidates.size();
-            if (best != null) {
-                final float dist = player.DistTo(best);
-                debugLog(true, candidates.size(), best, dist);
-                return;
-            }
+            System.out.println("[RelaxedAim DEBUG] Scan complete. Candidates: " + debugCandidateCount);
         }
+
+        // 锁定状态机：每帧校验，节流帧（candidates != null）尝试获取/更新
+        TargetLockService.update(player, weapon, pIndex, mouseX, mouseY, candidates);
 
         debugLog(true, debugCandidateCount);
     }
 
-    /** Returns the ranged weapon currently held by the player, or {@code null}. */
-    private static HandWeapon getActiveWeapon(final IsoPlayer player) {
+    private static HandWeapon getActiveWeapon(final IsoPlayer player) throws Exception {
         InventoryItem item = player.getPrimaryHandItem();
         if (item instanceof HandWeapon) {
             return (HandWeapon) item;
@@ -142,108 +161,130 @@ public final class AimAssistService {
         return player.getUseHandWeapon();
     }
 
-    /** Gathers all zombies that pass the Phase 2 filters. */
-    private static List<IsoZombie> findCandidates(final IsoPlayer player, final HandWeapon weapon) {
+    private static int playerIndex = -1;
+
+    private static int getPlayerIndex() {
+        try {
+            playerIndex = IsoPlayer.getPlayerIndex();
+        } catch (Exception e) {
+            System.out.println("[RelaxedAim DEBUG] Exception getting player index: " + e.getMessage());
+            playerIndex = 0;
+        }
+        return playerIndex;
+    }
+
+    /**
+     * 单遍扫描：廉价过滤（存活/楼层/射程/可见性）后，仅收集「鼠标附近 lockRadiusPx 内」的丧尸。
+     * 候选数量达到 maxCandidates 即停止（有限遍历）。
+     * 投影统一使用 getAimOriginPosZ()（瞄准点/胸口高度），与锁定标记一致。
+     */
+    private static List<IsoZombie> findCandidates(final IsoPlayer player, final HandWeapon weapon,
+            final ArrayList<IsoZombie> zombies, int playerIndex, int mouseX, int mouseY) {
         final List<IsoZombie> candidates = new ArrayList<>();
 
-        // Reset filter counters each scan.
         debugTotalZombies = 0;
-        debugRejectedFloor = 0;
-        debugRejectedRange = 0;
-        debugRejectedVisibility = 0;
-        debugRejectedMouse = 0;
-        debugNearestZombie = "-";
-        debugNearestDistance = Float.MAX_VALUE;
-        debugNearestScreenX = 0.0f;
-        debugNearestScreenY = 0.0f;
+        int rejectedFloor = 0;
+        int rejectedRange = 0;
+        int rejectedVisibility = 0;
+        int rejectedMouse = 0;
 
-        if (IsoWorld.instance == null) {
-            return candidates;
-        }
-        final IsoCell cell = IsoWorld.instance.currentCell;
-        if (cell == null) {
-            return candidates;
-        }
-
-        final ArrayList<IsoZombie> zombies = cell.getZombieList();
         if (zombies == null || zombies.isEmpty()) {
+            System.out.println("[RelaxedAim DEBUG] No zombies in cell");
             return candidates;
         }
 
-        final int playerIndex = IsoPlayer.getPlayerIndex();
-        final float playerZ = player.getZ();
+        debugTotalZombies = zombies.size();
+
+        final float playerZ;
+        try {
+            playerZ = player.getZ();
+        } catch (Exception e) {
+            System.out.println("[RelaxedAim DEBUG] Exception getting player Z: " + e.getMessage());
+            return candidates;
+        }
+
         float maxRange = weapon.getMaxRange();
         if (maxRange <= 0.0f || maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
             maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
         }
 
-        final int mouseX = Mouse.getX();
-        final int mouseY = Mouse.getY();
+        final float lockRadius = RelaxedAimConfig.lockRadiusPx;
+        final int maxCands = RelaxedAimConfig.maxCandidates;
+
+        float minScreenDist = Float.MAX_VALUE;
 
         for (final IsoZombie zombie : zombies) {
+            if (candidates.size() >= maxCands) {
+                break; // 有限遍历上限，达到即停止收集
+            }
             if (zombie == null || zombie.isDead() || !zombie.isAlive()) {
                 continue;
             }
 
-            debugTotalZombies++;
-
-            final float dist = player.DistTo(zombie);
-            if (dist < debugNearestDistance) {
-                debugNearestDistance = dist;
-                debugNearestZombie = zombie.toString();
-                debugNearestScreenX = zombie.getScreenX();
-                debugNearestScreenY = zombie.getScreenY();
+            // Floor check
+            float zombieZ;
+            try {
+                zombieZ = zombie.getZ();
+            } catch (Exception e) {
+                continue; // 无法获取Z坐标，跳过
             }
 
-            if (Math.abs(zombie.getZ() - playerZ) > FLOOR_TOLERANCE) {
-                debugRejectedFloor++;
+            if (Math.abs(zombieZ - playerZ) > FLOOR_TOLERANCE) {
+                rejectedFloor++;
                 continue;
             }
+
+            // Range check
+            final float dist;
+            try {
+                dist = player.DistTo(zombie);
+            } catch (Exception e) {
+                continue; // 无法计算距离，跳过
+            }
+
             if (dist > maxRange) {
-                debugRejectedRange++;
-                continue;
-            }
-            if (zombie.getSquare() != null && !zombie.getSquare().getCanSee(playerIndex)) {
-                debugRejectedVisibility++;
+                rejectedRange++;
                 continue;
             }
 
-            final float sx = zombie.getScreenX();
-            final float sy = zombie.getScreenY();
-            final float mouseDist = IsoUtils.DistanceTo(mouseX, mouseY, sx, sy);
-            if (mouseDist > MOUSE_SEARCH_RADIUS_PIXELS) {
-                debugRejectedMouse++;
-                continue;
+            // Visibility check
+            try {
+                if (zombie.getSquare() != null && !zombie.getSquare().getCanSee(playerIndex)) {
+                    rejectedVisibility++;
+                    continue;
+                }
+            } catch (Exception e) {
+                // 可见性检查失败，继续处理（不跳过）
             }
 
-            candidates.add(zombie);
+            // Mouse proximity check（与锁定标记一致：瞄准点投影）
+            try {
+                final float projZ = zombie.getAimOriginPosZ();
+                final float sx = IsoUtils.XToScreenExact(zombie.getX(), zombie.getY(), projZ, playerIndex);
+                final float sy = IsoUtils.YToScreenExact(zombie.getX(), zombie.getY(), projZ, playerIndex);
+                final float screenDist = IsoUtils.DistanceTo(mouseX, mouseY, sx, sy);
+                if (screenDist <= lockRadius) {
+                    candidates.add(zombie);
+                    if (screenDist < minScreenDist) {
+                        minScreenDist = screenDist;
+                    }
+                } else {
+                    rejectedMouse++;
+                }
+            } catch (Exception e) {
+                // 投影失败，跳过此丧尸
+            }
         }
+
+        System.out.println("[RelaxedAim DEBUG] Filter results: total=" + debugTotalZombies
+                + ", floor=" + rejectedFloor + ", range=" + rejectedRange
+                + ", visibility=" + rejectedVisibility + ", mouse=" + rejectedMouse
+                + ", final=" + candidates.size()
+                + ", minScreenDist=" + (minScreenDist == Float.MAX_VALUE ? "-" : String.format("%.2f", minScreenDist)));
 
         return candidates;
     }
 
-    /** Picks the candidate with the lowest combined screen + weighted world distance. */
-    private static IsoZombie pickBestCandidate(final List<IsoZombie> candidates, final IsoPlayer player) {
-        IsoZombie best = null;
-        float bestScore = Float.MAX_VALUE;
-
-        final int mouseX = Mouse.getX();
-        final int mouseY = Mouse.getY();
-
-        for (final IsoZombie zombie : candidates) {
-            final float screenDist = IsoUtils.DistanceTo(mouseX, mouseY, zombie.getScreenX(), zombie.getScreenY());
-            final float worldDist = player.DistTo(zombie);
-            final float score = screenDist + worldDist * WORLD_DISTANCE_WEIGHT;
-            if (score < bestScore) {
-                bestScore = score;
-                best = zombie;
-            }
-        }
-
-        return best;
-    }
-
-    /** Throttled logger that only prints when the active/candidate state changes. */
     private static void debugLog(boolean active, int candidateCount) {
         if (active == lastActive && candidateCount == lastCandidateCount) {
             return;
@@ -255,22 +296,5 @@ public final class AimAssistService {
         lastCandidateCount = candidateCount;
         lastLogFrame = frameCounter;
         System.out.println("[RelaxedAim] Phase2 active=" + active + ", candidates=" + candidateCount);
-    }
-
-    /** Throttled logger that includes the currently selected best target. */
-    private static void debugLog(boolean active, int candidateCount, IsoZombie best, float distance) {
-        if (active == lastActive && candidateCount == lastCandidateCount) {
-            return;
-        }
-        if (frameCounter - lastLogFrame < LOG_INTERVAL_FRAMES) {
-            return;
-        }
-        lastActive = active;
-        lastCandidateCount = candidateCount;
-        lastLogFrame = frameCounter;
-        System.out.println("[RelaxedAim] Phase2 active=" + active
-                + ", candidates=" + candidateCount
-                + ", best=" + best
-                + ", distance=" + distance);
     }
 }

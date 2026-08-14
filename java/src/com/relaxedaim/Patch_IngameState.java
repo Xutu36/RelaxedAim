@@ -1,102 +1,95 @@
 package com.relaxedaim;
 
 import me.zed_0xff.zombie_buddy.Patch;
-import zombie.gameStates.IngameState;
-import zombie.ui.TextManager;
-import zombie.ui.UIFont;
+import zombie.characters.IsoPlayer;
+import zombie.iso.IsoWorld;
+import zombie.input.Mouse;
 
 /**
- * Phase 2 & 4: hook the in-game UI render loop so we can read aim state every frame
- * and draw visual diagnostics on the screen.
+ * Phase 2: hook the in-game UI render loop to collect aim state.
+ *
+ * VERSION: ConsoleDebug-v4.2 - 使用Callbacks绘制Overlay，修复候选丧尸恒为0
  */
 @Patch(className = "zombie.gameStates.IngameState", methodName = "renderframeui")
 public final class Patch_IngameState {
+
+    // 【重要】必须public，否则ZombieBuddy无法访问导致IllegalAccessError
+    public static int callCounter = 0;
+    public static boolean hasLoggedInit = false;
 
     private Patch_IngameState() {
     }
 
     @Patch.OnExit
     public static void afterRenderFrameUI() {
-        // 1. Update targeting calculations
-        AimAssistService.update();
+        callCounter++;
 
-        // 2. Draw HUD Debug Overlay Box
-        drawDebugOverlay();
-
-        // 3. Draw visual lock marker on the nearest zombie if locked
-        drawTargetMarker();
-    }
-
-    public static void drawDebugOverlay() {
-        final UIFont font = UIFont.Small;
-        final TextManager textMgr = TextManager.instance;
-
-        // Position of the debug panel (top left below general UI)
-        int x = 20;
-        int y = 140;
-        final int lineH = 16;
-
-        // Header
-        textMgr.DrawString(font, x, y, "[RelaxedAim] Debug Monitor (Phase 2)", 0.3, 0.9, 0.9, 0.82);
-        y += lineH;
-
-        // Game/Aim State
-        if (AimAssistService.debugIsAiming) {
-            String stateStr = "State: AIMING";
-            if (AimAssistService.debugHasRangedWeapon) {
-                stateStr += " (Ranged: " + AimAssistService.debugWeaponName + ", MaxRange: " + AimAssistService.debugWeaponRange + ")";
-                textMgr.DrawString(font, x, y, stateStr, 0.2, 1.0, 0.2, 0.9);
-            } else {
-                stateStr += " (Melee/None: " + AimAssistService.debugWeaponName + ")";
-                textMgr.DrawString(font, x, y, stateStr, 1.0, 0.6, 0.0, 0.9);
-            }
-        } else {
-            textMgr.DrawString(font, x, y, "State: IDLE (Aim to activate)", 0.6, 0.6, 0.6, 0.8);
+        // 初始化日志（只打印一次到console）
+        if (!hasLoggedInit) {
+            hasLoggedInit = true;
+            System.out.println("[RelaxedAim] Patch_IngameState initialized (update-only)");
         }
-        y += lineH;
 
-        // Target filters
-        textMgr.DrawString(font, x, y, String.format("Zombies in Cell: %d", AimAssistService.debugTotalZombies), 0.9, 0.9, 0.9, 0.8);
-        y += lineH;
-
-        textMgr.DrawString(font, x, y, String.format("- Rejected (Different Floor): %d", AimAssistService.debugRejectedFloor), 0.8, 0.5, 0.5, 0.7);
-        y += lineH;
-        textMgr.DrawString(font, x, y, String.format("- Rejected (Out of Max Range): %d", AimAssistService.debugRejectedRange), 0.8, 0.5, 0.5, 0.7);
-        y += lineH;
-        textMgr.DrawString(font, x, y, String.format("- Rejected (Blocked/Invisible): %d", AimAssistService.debugRejectedVisibility), 0.8, 0.5, 0.5, 0.7);
-        y += lineH;
-        textMgr.DrawString(font, x, y, String.format("- Rejected (Too Far from Mouse): %d", AimAssistService.debugRejectedMouse), 0.8, 0.5, 0.5, 0.7);
-        y += lineH;
-
-        // Candidates summary
-        if (AimAssistService.debugCandidateCount > 0) {
-            textMgr.DrawString(font, x, y, String.format("Candidates Found: %d", AimAssistService.debugCandidateCount), 0.2, 1.0, 0.2, 0.9);
-            y += lineH;
-            textMgr.DrawString(font, x, y, String.format("Locked: Target (Dist: %.1f)", AimAssistService.debugNearestDistance), 0.9, 0.9, 0.2, 0.9);
-        } else {
-            textMgr.DrawString(font, x, y, "Candidates Found: 0", 0.8, 0.8, 0.8, 0.8);
-        }
-    }
-
-    public static void drawTargetMarker() {
-        if (!AimAssistService.debugIsAiming || !AimAssistService.debugHasRangedWeapon) {
+        // 【安全检查1】确保游戏世界实例存在
+        if (IsoWorld.instance == null) {
             return;
         }
 
-        if (AimAssistService.debugCandidateCount > 0 && AimAssistService.debugNearestScreenX != 0.0f) {
-            final float x = AimAssistService.debugNearestScreenX;
-            final float y = AimAssistService.debugNearestScreenY;
+        // 【安全检查2】确保当前单元格已加载
+        if (IsoWorld.instance.currentCell == null) {
+            return;
+        }
 
-            // Draw a high-contrast crosshair/marker over the candidate's torso/head area
-            // Feet are at (x, y), so we offset upward by 50 pixels for the chest/head
-            TextManager.instance.DrawString(
-                UIFont.Medium,
-                x - 20,
-                y - 50,
-                "< LOCK >",
-                0.2, 1.0, 0.2, 1.0 // Vivid Green
-            );
+        // 【安全检查3】确保玩家实例存在
+        if (!IsoPlayer.hasInstance()) {
+            return;
+        }
+
+        final IsoPlayer player = IsoPlayer.getInstance();
+        // 【安全检查4】玩家对象非空
+        if (player == null) {
+            return;
+        }
+
+        // 【安全检查5】确保玩家已完全加载（位置有效）
+        final float playerX, playerY, playerZ;
+        try {
+            playerX = player.getX();
+            playerY = player.getY();
+            playerZ = player.getZ();
+
+            // 检查位置是否有效（不是NaN或无穷大）
+            if (Float.isNaN(playerX) || Float.isNaN(playerY) || Float.isNaN(playerZ) ||
+                Float.isInfinite(playerX) || Float.isInfinite(playerY) || Float.isInfinite(playerZ)) {
+                return;
+            }
+        } catch (Exception e) {
+            return;
+        }
+
+        // 获取基础信息（鼠标位置、瞄准状态）
+        final int mouseX, mouseY;
+        final boolean isAiming;
+        try {
+            mouseX = Mouse.getX();
+            mouseY = Mouse.getY();
+            isAiming = player.isAiming();
+        } catch (Exception e) {
+            return;
+        }
+
+        // 只有在瞄准时才执行详细处理和日志输出
+        if (!isAiming) {
+            AimAssistService.markNotAiming();
+            return;
+        }
+
+        // 【瞄准时】执行详细逻辑
+        try {
+            AimAssistService.updateAiming(player, mouseX, mouseY, playerX, playerY, playerZ);
+        } catch (Exception e) {
+            System.out.println("[RelaxedAim] ERROR during aiming update: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
-

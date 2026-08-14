@@ -1,0 +1,50 @@
+RelaxedAim 调试版本部署说明
+============================
+
+编译完成时间: 2026-08-13
+版本: 纯Console日志调试版 (HUD渲染已禁用)
+
+功能
+----
+- 放弃屏幕HUD渲染,改为纯Console输出调试信息
+- 在瞄准状态时,Console会输出详细的扫描日志:
+  * 玩家位置、鼠标位置
+  * 武器信息
+  * 总丧尸数量
+  * 每个过滤条件拒绝的数量
+  * 最终候选丧尸数量和详情
+
+部署步骤
+--------
+1. 复制 JAR 文件到游戏模组目录:
+   
+   源文件: d:\PZMod\RelaxedAim\java\build\libs\RelaxedAim.jar
+   目标:   C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\RelaxedAim.jar
+
+2. 启动游戏,加载存档
+
+3. 按 ~ 键打开Console,观察 [RelaxedAim] 开头的日志输出
+
+4. 拿一把远程武器,瞄准僵尸,查看Console输出的扫描详情
+
+验证日志示例
+------------
+[RelaxedAim DEBUG] === Frame 1234 ===
+[RelaxedAim DEBUG] Mouse: (800, 600)
+[RelaxedAim DEBUG] Player pos: (1234.5, 5678.9, 0.0)
+[RelaxedAim DEBUG] isAiming: true
+[RelaxedAim DEBUG] Weapon: M9 Pistol, ranged: true, range: 10.0
+[RelaxedAim DEBUG] === Starting zombie scan ===
+[RelaxedAim DEBUG] Total zombies in cell: 5
+[RelaxedAim DEBUG] Player Z: 0.0, maxRange: 10.0, mouse: (800, 600)
+[RelaxedAim DEBUG] + Candidate found: dist=3.45, mouseDist=120.50, screen=(750.0, 580.0)
+[RelaxedAim DEBUG] Filter results: total=5, floor=0, range=0, visibility=0, mouse=4, final=1
+[RelaxedAim DEBUG] Scan complete. Candidates: 1
+
+故障排查
+--------
+如果看不到 [RelaxedAim] 日志:
+1. 检查 JAR 是否正确复制到目标目录
+2. 检查模组管理器中 RelaxedAim 是否启用
+3. 检查 console.txt 中是否有加载错误
+4. 尝试只启用 ZombieBuddy + RelaxedAim 两个模组

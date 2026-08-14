@@ -1,0 +1,67 @@
+===============================================
+RelaxedAim 调试版本 - 手动部署说明
+===============================================
+版本: ConsoleDebug-v1
+构建时间: 2026-08-13
+
+功能变更
+--------
+- 放弃屏幕HUD渲染，改为纯Console日志输出
+- 新增详细的扫描日志，帮助诊断候选丧尸为0的问题
+
+需要手动复制的文件
+-------------------
+
+源文件位置:
+  D:\PZMod\RelaxedAim\java\build\libs\RelaxedAim.jar
+
+目标位置 (必须覆盖):
+  C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\RelaxedAim.jar
+
+操作步骤
+--------
+
+1. 打开文件资源管理器
+2. 导航到: D:\PZMod\RelaxedAim\java\build\libs\
+3. 找到 RelaxedAim.jar 文件
+4. 按 Ctrl+C 复制
+5. 导航到: C:\Users\Administrator\Zomboid\mods\RelaxedAim\42\media\java\client\
+6. 按 Ctrl+V 粘贴，选择"替换目标中的文件"
+
+验证部署
+--------
+
+复制完成后，检查文件的修改时间是否与当前时间一致。
+
+启动游戏测试
+------------
+
+1. 启动 Project Zomboid
+2. 加载任意存档进入游戏
+3. 按 ~ 键打开 Console
+4. 观察是否有 [RelaxedAim] 开头的日志输出
+
+预期输出示例
+------------
+
+当瞄准丧尸时，应该看到类似:
+
+[RelaxedAim DEBUG] === Frame 1234 ===
+[RelaxedAim DEBUG] Mouse: (800, 600)
+[RelaxedAim DEBUG] Player pos: (1234.5, 5678.9, 0.0)
+[RelaxedAim DEBUG] isAiming: true
+[RelaxedAim DEBUG] Weapon: M9 Pistol, ranged: true, range: 10.0
+[RelaxedAim DEBUG] === Starting zombie scan ===
+[RelaxedAim DEBUG] Total zombies in cell: 5
+...
+
+故障排查
+--------
+
+如果看不到日志:
+
+1. 确认 JAR 文件已正确覆盖（检查修改时间）
+2. 确认 ZombieBuddy 模组已启用
+3. 确认 RelaxedAim 模组已启用
+4. 尝试只启用 ZombieBuddy + RelaxedAim 两个模组
+5. 检查 C:\Users\Administrator\Zomboid\console.txt 是否有 [RelaxedAim] 相关日志

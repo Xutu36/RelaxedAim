@@ -4,6 +4,7 @@ plugins {
 
 def gameDir = file('D:/steam/steamapps/common/ProjectZomboid')
 def modDir = file('../42')
+def zombieBuddyJar = file('D:/steam/steamapps/workshop/content/108600/3619862853/mods/ZombieBuddy/libs/ZombieBuddy.jar')
 
 repositories {
     mavenCentral()
@@ -18,7 +19,7 @@ java {
 dependencies {
     // The game and ZombieBuddy provide these classes at runtime. Do not package them in this mod JAR.
     compileOnly files(new File(gameDir, 'projectzomboid.jar'))
-    compileOnly files(new File(gameDir, 'ZombieBuddy.jar'))
+    compileOnly files(zombieBuddyJar.exists() ? zombieBuddyJar : new File(gameDir, 'ZombieBuddy.jar'))
 }
 
 sourceSets {
