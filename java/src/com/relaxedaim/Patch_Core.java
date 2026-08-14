@@ -78,8 +78,8 @@ public final class Patch_Core {
             draw(font, x, y, "LastLost: " + TargetLockService.debugReleaseReason + " (" + ago + " ago)", 0.9f, 0.6f, 0.4f, 1.0f);
         }
 
-        // 在锁定丧尸的瞄准点（胸口/头部高度）绘制锁定环标记
-        drawLockMarker();
+        // 锁定辅助 UI：范围圈 / 头部锁定指示（紫色圈，锁定目标或最近候选）
+        drawLockAssistUI();
 
         // 右侧调试面板：实时打印鼠标与锁定目标的关键相对位置（用于排查缩放/坐标偏差）
         drawRightPanel();
@@ -165,11 +165,27 @@ public final class Patch_Core {
         }
     }
 
+    /** 多段线段近似圆环。 */
+    public static void drawRing(SpriteRenderer sr, Texture white, float cx, float cy, float radius,
+            float r, float g, float b, float a, float lw) {
+        final int segments = 32;
+        for (int i = 0; i < segments; i++) {
+            double a0 = 2.0 * Math.PI * i / segments;
+            double a1 = 2.0 * Math.PI * (i + 1) / segments;
+            int x1 = (int) (cx + radius * Math.cos(a0));
+            int y1 = (int) (cy + radius * Math.sin(a0));
+            int x2 = (int) (cx + radius * Math.cos(a1));
+            int y2 = (int) (cy + radius * Math.sin(a1));
+            sr.renderline(white, x1, y1, x2, y2, r, g, b, a, lw);
+        }
+    }
+
     /**
-     * 在锁定目标上绘制「环 + 竖直连线 + 中心点」标记；目标在屏幕外时改画指向目标的边缘箭头。
-     * 与鼠标候选筛选使用同一投影（getAimOriginPosZ），保证「画出来的就是锁定的」。
+     * 锁定辅助 UI（由两个 bool 控制，见 RelaxedAimConfig）：
+     *  - optionShowLockRange：以当前世界瞄准点为中心画锁定范围圈（半径 lockRadiusWorld）。
+     *  - optionHighlightNearest：高亮范围内最近将被锁定的丧尸。
      */
-    public static void drawLockMarker() {
+    public static void drawLockAssistUI() {
         if (!RelaxedAimConfig.optionLockOn) {
             return;
         }
@@ -183,82 +199,48 @@ public final class Patch_Core {
         if (player == null || !player.isAiming()) {
             return;
         }
-        final IsoZombie z = TargetLockService.getLockedTarget();
-        if (z == null) {
-            return;
-        }
-
         int pIndex = 0;
         try {
             pIndex = IsoPlayer.getPlayerIndex();
         } catch (Exception e) {
         }
 
-        final float sx = TargetLockService.aimScreenX(z, pIndex);
-        final float sy = TargetLockService.aimScreenY(z, pIndex);
-        final float footSy = TargetLockService.worldScreenY(z.getX(), z.getY(), z.getZ(), pIndex);
-
         final Texture white = Texture.getWhite();
         final SpriteRenderer sr = SpriteRenderer.instance;
-        final float r = RelaxedAimConfig.markerR;
-        final float g = RelaxedAimConfig.markerG;
-        final float b = RelaxedAimConfig.markerB;
-        final float a = RelaxedAimConfig.markerA;
-        final float radius = RelaxedAimConfig.markerRadiusPx;
-        final float lw = RelaxedAimConfig.markerLineWidth;
+        final float lw = 1.5f;
 
-        // 屏幕可视区域（留白）
-        final float m = 26.0f;
-        final float vw = Core.width;
-        final float vh = Core.height;
-        final boolean offScreen = sx < m || sx > vw - m || sy < m || sy > vh - m;
-
-        if (offScreen) {
-            drawOffScreenArrow(sr, white, sx, sy, m, vw, vh, r, g, b, a, lw);
-            return;
+        // 范围圈
+        if (RelaxedAimConfig.optionShowLockRange && TargetLockService.aimWorldValid) {
+            try {
+                final float zoom = TargetLockService.getZoom(pIndex);
+                final float cx = TargetLockService.worldScreenX(TargetLockService.aimWorldX,
+                        TargetLockService.aimWorldY, TargetLockService.aimWorldZ, pIndex);
+                final float cy = TargetLockService.worldScreenY(TargetLockService.aimWorldX,
+                        TargetLockService.aimWorldY, TargetLockService.aimWorldZ, pIndex);
+                // 屏幕像素半径 ≈ 世界瓦片 × 32 × tileScale / zoom（iso 近似，用户可按 bool 取舍）
+                final float radius = RelaxedAimConfig.lockRadiusWorld * 32.0f * zombie.core.Core.tileScale / zoom;
+                drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, 0.6f, lw);
+            } catch (Exception e) {
+            }
         }
 
-        // 竖直连线：从瞄准点向下到脚底，明确指向「哪一只」
-        sr.renderline(white, (int) sx, (int) sy, (int) sx, (int) footSy, r, g, b, a, lw);
-
-        // 锁定环：多段线段近似圆
-        final int segments = 24;
-        for (int i = 0; i < segments; i++) {
-            double a0 = 2.0 * Math.PI * i / segments;
-            double a1 = 2.0 * Math.PI * (i + 1) / segments;
-            int x1 = (int) (sx + radius * Math.cos(a0));
-            int y1 = (int) (sy + radius * Math.sin(a0));
-            int x2 = (int) (sx + radius * Math.cos(a1));
-            int y2 = (int) (sy + radius * Math.sin(a1));
-            sr.renderline(white, x1, y1, x2, y2, r, g, b, a, lw);
+        // 紫色圈：画在「将被/正在锁定」丧尸头部骨骼（Bip01_Head）精确位置，有锁定时指向锁定目标，否则最近候选
+        if (RelaxedAimConfig.optionHighlightNearest) {
+            final IsoZombie n = TargetLockService.getLockedTarget() != null
+                    ? TargetLockService.getLockedTarget()
+                    : AimAssistService.debugNearestCandidate;
+            if (n != null) {
+                try {
+                    TargetLockService.headAimWorldPos(n, TargetLockService.sHeadPos);
+                    final float nx = TargetLockService.worldScreenX(TargetLockService.sHeadPos.x,
+                            TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
+                    final float ny = TargetLockService.worldScreenY(TargetLockService.sHeadPos.x,
+                            TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
+                    drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f, lw);
+                } catch (Exception e) {
+                }
+            }
         }
-
-        // 中心点
-        int dot = 5;
-        sr.renderi(white, (int) sx - dot / 2, (int) sy - dot / 2, dot, dot, r, g, b, a, null);
-    }
-
-    /** 屏外指示：在屏幕边缘画一个指向目标的三角形箭头。 */
-    public static void drawOffScreenArrow(SpriteRenderer sr, Texture white, float sx, float sy,
-            float m, float vw, float vh, float r, float g, float b, float a, float lw) {
-        final float px = Math.max(m, Math.min(vw - m, sx));
-        final float py = Math.max(m, Math.min(vh - m, sy));
-        final double angle = Math.atan2(sy - py, sx - px); // 从箭头指向目标
-        final float len = 15.0f;
-        final float halfBase = 8.0f;
-        // 尖端
-        final float tipX = (float) (px + len * Math.cos(angle));
-        final float tipY = (float) (py + len * Math.sin(angle));
-        // 垂直方向单位向量
-        final float bx = (float) (-Math.sin(angle));
-        final float by = (float) (Math.cos(angle));
-        final float b1x = px + bx * halfBase;
-        final float b1y = py + by * halfBase;
-        final float b2x = px - bx * halfBase;
-        final float b2y = py - by * halfBase;
-        sr.renderline(white, (int) tipX, (int) tipY, (int) b1x, (int) b1y, r, g, b, a, lw);
-        sr.renderline(white, (int) b1x, (int) b1y, (int) b2x, (int) b2y, r, g, b, a, lw);
-        sr.renderline(white, (int) b2x, (int) b2y, (int) tipX, (int) tipY, r, g, b, a, lw);
     }
 
     public static void draw(UIFont font, int x, int y, String text, float r, float g, float b, float a) {

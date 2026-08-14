@@ -3,4 +3,8 @@ UI_CH = {
     UI_RelaxedAim_LockOn_desc = "开启后自动锁定准星附近最近的丧尸并绘制锁定标记；关闭后仅显示HUD调试信息。",
     UI_RelaxedAim_ShotgunNoLock = "装备霰弹枪瞄准时取消辅助锁定",
     UI_RelaxedAim_ShotgunNoLock_desc = "开启后，使用霰弹枪瞄准（常用于大面积杀伤）时不进行辅助锁定。",
+    UI_RelaxedAim_ShowLockRange = "显示锁定捕获范围圈",
+    UI_RelaxedAim_ShowLockRange_desc = "在当前瞄准点周围绘制一个圆，表示该范围内最近的丧尸将被锁定。",
+    UI_RelaxedAim_HighlightNearest = "高亮最近将被锁定的丧尸",
+    UI_RelaxedAim_HighlightNearest_desc = "高亮离瞄准点最近、即将被锁定的丧尸。",
 }

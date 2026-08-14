@@ -120,6 +120,117 @@ public final class TargetLockService {
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
+    // ========== 原始鼠标世界瞄准点（锁定簿记用，不受 reticle 覆盖影响） ==========
+
+    /**
+     * 锁定生效期间 reticle 被覆盖为锁定丧尸头部，导致 aimWorld 恒指向锁定目标，
+     * 释放/重筛判定必须用「原始鼠标」算出的世界瞄准点，否则移动鼠标永远无法释放锁定。
+     */
+    public static float rawAimWorldX = 0.0f;
+    public static float rawAimWorldY = 0.0f;
+    public static float rawAimWorldZ = 0.0f;
+    public static boolean rawAimWorldValid = false;
+
+    /** 用原始鼠标（Mouse.getXA/YA × zoom → XToIso）计算世界瞄准点。 */
+    public static void updateRawAimWorld(IsoPlayer player, int pIndex) {
+        rawAimWorldValid = false;
+        try {
+            final float zoom = getZoom(pIndex);
+            final float rx = zombie.input.Mouse.getXA() * zoom;
+            final float ry = zombie.input.Mouse.getYA() * zoom;
+            final float z = player.getAimOriginPosZ();
+            rawAimWorldX = IsoUtils.XToIso(pIndex, rx, ry, z);
+            rawAimWorldY = IsoUtils.YToIso(pIndex, rx, ry, z);
+            rawAimWorldZ = z;
+            rawAimWorldValid = true;
+        } catch (Exception e) {
+        }
+    }
+
+    public static float rawAimWorldDistTo(IsoZombie z) {
+        final float dx = z.getX() - rawAimWorldX;
+        final float dy = z.getY() - rawAimWorldY;
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // ========== 锁定核心：覆盖 AimingReticle 使准星/弹道对准锁定丧尸头部 ==========
+
+    /** 复用 Vector3，避免每次分配。 */
+    public static final zombie.iso.Vector3 sHeadPos = new zombie.iso.Vector3();
+
+    /** 头部世界瞄准点 = Bip01_Head 骨骼 + 姿态自适应偏移（站立沿 +Z 抬 headAimOffsetZ，倒地不抬）。 */
+    public static boolean headAimWorldPos(IsoZombie z, zombie.iso.Vector3 out) {
+        try {
+            zombie.CombatManager.getBoneWorldPos(z, "Bip01_Head", out);
+            boolean prone = false;
+            try {
+                prone = z.isProne();
+            } catch (Exception e) {
+            }
+            if (!prone) {
+                out.z += RelaxedAimConfig.headAimOffsetZ;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 锁定瞄准是否生效（本地玩家 + 持远程武器瞄准 + 非霰弹枪开关 + 有锁定目标）。
+     * 供 AimingReticle.getXA/getYA 覆盖判定使用。
+     */
+    public static boolean isLockAimingActive(int pIndex) {
+        if (!RelaxedAimConfig.optionLockOn || lockedTarget == null) {
+            return false;
+        }
+        try {
+            final int local = zombie.characters.IsoPlayer.getPlayerIndex();
+            if (pIndex != local) {
+                return false;
+            }
+            final zombie.characters.IsoPlayer player = zombie.characters.IsoPlayer.getPlayer(pIndex);
+            if (player == null || !player.isAiming()) {
+                return false;
+            }
+            final HandWeapon weapon = AimAssistService.getActiveWeapon(player);
+            if (weapon == null || !weapon.isRanged()) {
+                return false;
+            }
+            if (RelaxedAimConfig.optionShotgunNoLock && AimAssistService.isShotgun(weapon)) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** 返回锁定丧尸头部的屏幕X；不生效返回 Integer.MIN_VALUE。 */
+    public static int overrideReticleX(int pIndex) {
+        try {
+            if (!isLockAimingActive(pIndex)) {
+                return Integer.MIN_VALUE;
+            }
+            headAimWorldPos(lockedTarget, sHeadPos);
+            return (int) worldScreenX(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+        } catch (Exception e) {
+            return Integer.MIN_VALUE;
+        }
+    }
+
+    public static int overrideReticleY(int pIndex) {
+        try {
+            if (!isLockAimingActive(pIndex)) {
+                return Integer.MIN_VALUE;
+            }
+            headAimWorldPos(lockedTarget, sHeadPos);
+            return (int) worldScreenY(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+        } catch (Exception e) {
+            return Integer.MIN_VALUE;
+        }
+    }
+
     /**
      * 鼠标「虚拟空间」坐标 = 原始像素 × zoom。
      * 游戏准星/瞄准（AimingReticle.getX/getY）正是 `Mouse.getXA() * Core.getZoom()`，
@@ -218,9 +329,9 @@ public final class TargetLockService {
                 pendingReleaseReason = "occluded";
                 return false;
             }
-            // 世界空间距离（与游戏准星同一世界点），aimWorldValid 时优先；失败回退虚拟空间
-            if (aimWorldValid) {
-                final float aimDist = aimWorldDistTo(z);
+            // 释放/重筛用「原始鼠标」世界瞄准点（reticle 覆盖期间 aimWorld 恒为锁定目标，不可用于释放判定）
+            if (rawAimWorldValid) {
+                final float aimDist = rawAimWorldDistTo(z);
                 lockScreenDist = aimDist;
                 lockWorldDist = worldDist;
                 if (aimDist > RelaxedAimConfig.lockRadiusWorld * RelaxedAimConfig.reFilterMultiplier) {
@@ -277,8 +388,8 @@ public final class TargetLockService {
 
     public static float computeScreenDist(IsoZombie z, int mouseX, int mouseY) {
         try {
-            if (aimWorldValid) {
-                return aimWorldDistTo(z);
+            if (rawAimWorldValid) {
+                return rawAimWorldDistTo(z);
             }
             final float sx = aimVirtualX(z, lockPlayerIndex);
             final float sy = aimVirtualY(z, lockPlayerIndex);

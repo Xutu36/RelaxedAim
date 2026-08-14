@@ -3,4 +3,8 @@ UI_EN = {
     UI_RelaxedAim_LockOn_desc = "When ON, automatically locks onto the closest zombie near your aim point and draws a lock marker. When OFF, only the HUD info is shown.",
     UI_RelaxedAim_ShotgunNoLock = "Disable lock-on while aiming a shotgun",
     UI_RelaxedAim_ShotgunNoLock_desc = "When ON, aiming with a shotgun (typically used for area damage) disables the aim lock-on.",
+    UI_RelaxedAim_ShowLockRange = "Show lock capture range circle",
+    UI_RelaxedAim_ShowLockRange_desc = "Draws a circle around the current aim point showing the range within which zombies get locked.",
+    UI_RelaxedAim_HighlightNearest = "Highlight nearest zombie to be locked",
+    UI_RelaxedAim_HighlightNearest_desc = "Highlights the zombie closest to your aim point that is about to be locked.",
 }

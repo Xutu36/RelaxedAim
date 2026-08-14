@@ -39,6 +39,8 @@ public final class AimAssistService {
     public static int debugTotalZombies = 0;
     public static int debugCandidateCount = 0;
     public static String debugSkipReason = "none";
+    /** 最近一次搜索帧中离瞄准点最近的候选丧尸（供「高亮最近将锁定」UI 使用）。 */
+    public static IsoZombie debugNearestCandidate = null;
 
     public static boolean lastActive = false;
     public static int lastCandidateCount = 0;
@@ -91,14 +93,14 @@ public final class AimAssistService {
 
         // 【安全检查1】确保游戏世界实例存在
         if (IsoWorld.instance == null) {
-            System.out.println("[RelaxedAim DEBUG] IsoWorld.instance is null");
+            dbg("[RelaxedAim DEBUG] IsoWorld.instance is null");
             return;
         }
 
         // 【安全检查2】确保当前单元格已加载
         final IsoCell cell = IsoWorld.instance.currentCell;
         if (cell == null) {
-            System.out.println("[RelaxedAim DEBUG] currentCell is null");
+            dbg("[RelaxedAim DEBUG] currentCell is null");
             return;
         }
 
@@ -107,11 +109,11 @@ public final class AimAssistService {
         try {
             zombies = cell.getZombieList();
             if (zombies == null) {
-                System.out.println("[RelaxedAim DEBUG] Zombie list is null");
+                dbg("[RelaxedAim DEBUG] Zombie list is null");
                 return;
             }
         } catch (Exception e) {
-            System.out.println("[RelaxedAim DEBUG] Exception getting zombie list: " + e.getMessage());
+            dbg("[RelaxedAim DEBUG] Exception getting zombie list: " + e.getMessage());
             return;
         }
 
@@ -120,7 +122,7 @@ public final class AimAssistService {
         try {
             weapon = getActiveWeapon(player);
         } catch (Exception e) {
-            System.out.println("[RelaxedAim DEBUG] Exception getting weapon: " + e.getMessage());
+            dbg("[RelaxedAim DEBUG] Exception getting weapon: " + e.getMessage());
             return;
         }
 
@@ -155,15 +157,17 @@ public final class AimAssistService {
 
         // 每帧更新世界瞄准点（复刻游戏准星换算），供候选筛选与锁定校验使用
         TargetLockService.updateAimWorld(player, pIndex);
+        // 原始鼠标世界瞄准点：锁定簿记/释放判定用，不受 reticle 覆盖影响
+        TargetLockService.updateRawAimWorld(player, pIndex);
 
         // 节流搜索帧：重新扫描候选集合
         List<IsoZombie> candidates = null;
         if (frameCounter % RelaxedAimConfig.searchIntervalFrames == 0) {
-            System.out.println("[RelaxedAim DEBUG] === Frame " + frameCounter + " (AIMING) ===");
+            dbg("[RelaxedAim DEBUG] === Frame " + frameCounter + " (AIMING) ===");
             candidates = findCandidates(player, weapon, zombies, pIndex, mouseX, mouseY);
             debugCandidateCount = candidates.size();
             logAimDebug(player, pIndex, mouseX, mouseY, candidates);
-            System.out.println("[RelaxedAim DEBUG] Scan complete. Candidates: " + debugCandidateCount);
+            dbg("[RelaxedAim DEBUG] Scan complete. Candidates: " + debugCandidateCount);
         }
 
         // 锁定状态机：每帧校验，节流帧（candidates != null）尝试获取/更新
@@ -190,7 +194,7 @@ public final class AimAssistService {
         try {
             playerIndex = IsoPlayer.getPlayerIndex();
         } catch (Exception e) {
-            System.out.println("[RelaxedAim DEBUG] Exception getting player index: " + e.getMessage());
+            dbg("[RelaxedAim DEBUG] Exception getting player index: " + e.getMessage());
             playerIndex = 0;
         }
         return playerIndex;
@@ -234,7 +238,7 @@ public final class AimAssistService {
         int rejectedMouse = 0;
 
         if (zombies == null || zombies.isEmpty()) {
-            System.out.println("[RelaxedAim DEBUG] No zombies in cell");
+            dbg("[RelaxedAim DEBUG] No zombies in cell");
             return candidates;
         }
 
@@ -244,7 +248,7 @@ public final class AimAssistService {
         try {
             playerZ = player.getZ();
         } catch (Exception e) {
-            System.out.println("[RelaxedAim DEBUG] Exception getting player Z: " + e.getMessage());
+            dbg("[RelaxedAim DEBUG] Exception getting player Z: " + e.getMessage());
             return candidates;
         }
 
@@ -258,6 +262,7 @@ public final class AimAssistService {
         final int maxCands = RelaxedAimConfig.maxCandidates;
 
         float minScreenDist = Float.MAX_VALUE;
+        debugNearestCandidate = null;
 
         for (final IsoZombie zombie : zombies) {
             if (candidates.size() >= maxCands) {
@@ -303,14 +308,15 @@ public final class AimAssistService {
                 // 可见性检查失败，继续处理（不跳过）
             }
 
-            // World-space proximity check（与游戏准星完全一致：AimingReticle→XToIso 的世界瞄准点）
+            // World-space proximity check（用「原始鼠标」瞄准点，锁定期间 reticle 覆盖不影响候选筛选）
             try {
-                if (TargetLockService.aimWorldValid) {
-                    final float worldDist = TargetLockService.aimWorldDistTo(zombie);
+                if (TargetLockService.rawAimWorldValid) {
+                    final float worldDist = TargetLockService.rawAimWorldDistTo(zombie);
                     if (worldDist <= lockRadiusWorld) {
                         candidates.add(zombie);
                         if (worldDist < minScreenDist) {
                             minScreenDist = worldDist;
+                            debugNearestCandidate = zombie;
                         }
                     } else {
                         rejectedMouse++;
@@ -326,6 +332,7 @@ public final class AimAssistService {
                         candidates.add(zombie);
                         if (screenDist < minScreenDist) {
                             minScreenDist = screenDist;
+                            debugNearestCandidate = zombie;
                         }
                     } else {
                         rejectedMouse++;
@@ -336,7 +343,7 @@ public final class AimAssistService {
             }
         }
 
-        System.out.println("[RelaxedAim DEBUG] Filter results: total=" + debugTotalZombies
+        dbg("[RelaxedAim DEBUG] Filter results: total=" + debugTotalZombies
                 + ", floor=" + rejectedFloor + ", range=" + rejectedRange
                 + ", visibility=" + rejectedVisibility + ", mouse=" + rejectedMouse
                 + ", final=" + candidates.size()
@@ -355,7 +362,14 @@ public final class AimAssistService {
         lastActive = active;
         lastCandidateCount = candidateCount;
         lastLogFrame = frameCounter;
-        System.out.println("[RelaxedAim] Phase2 active=" + active + ", candidates=" + candidateCount);
+        dbg("[RelaxedAim] Phase2 active=" + active + ", candidates=" + candidateCount);
+    }
+
+    /** 调试日志统一入口：RelaxedAimConfig.debugConsoleLogs 为 true 时才打印。 */
+    public static void dbg(String msg) {
+        if (RelaxedAimConfig.debugConsoleLogs) {
+            System.out.println(msg);
+        }
     }
 
     /**
@@ -365,7 +379,7 @@ public final class AimAssistService {
      */
     public static void logAimDebug(IsoPlayer player, int pIndex, int mouseX, int mouseY, List<IsoZombie> candidates) {
         try {
-            if (!RelaxedAimConfig.debugLogCoordinates) {
+            if (!RelaxedAimConfig.debugConsoleLogs) {
                 return;
             }
             final float zoom = TargetLockService.getZoom(pIndex);

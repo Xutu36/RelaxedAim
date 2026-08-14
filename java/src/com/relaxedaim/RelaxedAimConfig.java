@@ -15,8 +15,8 @@ import java.io.InputStreamReader;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v1.5";
-    public static final String VERSION_NOTES = "锁定改用世界空间比较(复刻游戏准星 AimingReticle+XToIso); 新增瞄准/目标坐标日志";
+    public static final String VERSION = "Lock-v1.8";
+    public static final String VERSION_NOTES = "头部瞄准点可配置偏移(站立自适应,倒地不抬); 移除旧小圆+竖线标记; 紫色圈改用头部骨骼投影; 修复锁定后移动鼠标不释放(锁定簿记改用原始鼠标)";
 
     // ========== 模组选项（来自 游戏设置-模组，PZAPI.ModOptions 写入 ModOptions.ini） ==========
 
@@ -25,6 +25,12 @@ public final class RelaxedAimConfig {
 
     /** 选项：装备霰弹枪瞄准时取消辅助锁定（霰弹枪用于大面积杀伤）。默认 true。 */
     public static boolean optionShotgunNoLock = true;
+
+    /** 选项（UI）：绘制锁定范围圈（以当前瞄准点为中心，半径 lockRadiusWorld）。默认 true。 */
+    public static boolean optionShowLockRange = true;
+
+    /** 选项（UI）：高亮范围内最近将被锁定的丧尸。默认 true。 */
+    public static boolean optionHighlightNearest = true;
 
     public static long lastOptionsReadMs = 0L;
     public static final long OPTIONS_REFRESH_MS = 1000L;
@@ -57,6 +63,8 @@ public final class RelaxedAimConfig {
             }
             boolean lockOn = optionLockOn;
             boolean shotgunNoLock = optionShotgunNoLock;
+            boolean showLockRange = optionShowLockRange;
+            boolean highlightNearest = optionHighlightNearest;
             final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String line;
             while ((line = br.readLine()) != null) {
@@ -66,16 +74,25 @@ public final class RelaxedAimConfig {
                         lockOn = Boolean.parseBoolean(t[3]);
                     } else if ("shotgunNoLock".equals(t[2])) {
                         shotgunNoLock = Boolean.parseBoolean(t[3]);
+                    } else if ("showLockRange".equals(t[2])) {
+                        showLockRange = Boolean.parseBoolean(t[3]);
+                    } else if ("highlightNearest".equals(t[2])) {
+                        highlightNearest = Boolean.parseBoolean(t[3]);
                     }
                 }
             }
             br.close();
-            if (lockOn != optionLockOn || shotgunNoLock != optionShotgunNoLock) {
+            if (lockOn != optionLockOn || shotgunNoLock != optionShotgunNoLock
+                    || showLockRange != optionShowLockRange || highlightNearest != optionHighlightNearest) {
                 System.out.println("[RelaxedAim] Mod options -> LockOn=" + lockOn
-                        + ", ShotgunNoLock=" + shotgunNoLock);
+                        + ", ShotgunNoLock=" + shotgunNoLock
+                        + ", ShowLockRange=" + showLockRange
+                        + ", HighlightNearest=" + highlightNearest);
             }
             optionLockOn = lockOn;
             optionShotgunNoLock = shotgunNoLock;
+            optionShowLockRange = showLockRange;
+            optionHighlightNearest = highlightNearest;
             optionsReadFailed = false;
         } catch (Throwable t) {
             optionsReadFailed = true;
@@ -88,8 +105,15 @@ public final class RelaxedAimConfig {
     /** 筛选范围（世界瓦片）：准星世界瞄准点到丧尸的水平距离（世界空间主比较，任意缩放下与准星一致）。 */
     public static float lockRadiusWorld = 1.5f;
 
-    /** 调试：每个搜索帧打印瞄准点/鼠标/最近丧尸的坐标对比（用于排查坐标偏差）。 */
-    public static boolean debugLogCoordinates = true;
+    /**
+     * 头部瞄准偏移（世界Z，瓦片）：在头部骨骼 Bip01_Head 基础上沿世界向上再抬高的量，
+     * 用于把锁定点从「颈部/头骨底部」调整到「视觉头部」。站立时生效；倒地（isProne）时不抬，
+     * 以适配姿态（倒地的头已在贴地位置）。
+     */
+    public static float headAimOffsetZ = 0.05f;
+
+    /** 调试：控制 [RelaxedAim DEBUG] / [RelaxedAim AIMLOG] / Phase2 等调试日志是否打印。默认 false（功能已正常，跳过噪音）。 */
+    public static boolean debugConsoleLogs = false;
 
     /** 重筛选距离倍率（必须 > 1）：锁定后，仅当锁定目标与鼠标的屏幕距离超过 lockRadiusPx * 该值 时才重新搜索。 */
     public static float reFilterMultiplier = 1.5f;
