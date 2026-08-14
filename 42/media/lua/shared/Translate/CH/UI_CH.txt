@@ -1,0 +1,6 @@
+UI_CH = {
+    UI_RelaxedAim_LockOn = "启用丧尸自动锁定",
+    UI_RelaxedAim_LockOn_desc = "开启后自动锁定准星附近最近的丧尸并绘制锁定标记；关闭后仅显示HUD调试信息。",
+    UI_RelaxedAim_ShotgunNoLock = "装备霰弹枪瞄准时取消辅助锁定",
+    UI_RelaxedAim_ShotgunNoLock_desc = "开启后，使用霰弹枪瞄准（常用于大面积杀伤）时不进行辅助锁定。",
+}

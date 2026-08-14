@@ -1,0 +1,6 @@
+UI_EN = {
+    UI_RelaxedAim_LockOn = "Enable zombie lock-on",
+    UI_RelaxedAim_LockOn_desc = "When ON, automatically locks onto the closest zombie near your aim point and draws a lock marker. When OFF, only the HUD info is shown.",
+    UI_RelaxedAim_ShotgunNoLock = "Disable lock-on while aiming a shotgun",
+    UI_RelaxedAim_ShotgunNoLock_desc = "When ON, aiming with a shotgun (typically used for area damage) disables the aim lock-on.",
+}

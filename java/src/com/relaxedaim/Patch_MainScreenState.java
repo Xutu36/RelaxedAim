@@ -7,17 +7,13 @@ import zombie.ui.UIFont;
 /**
  * Phase 1: proves that RelaxedAim has loaded and can patch the game's menu UI.
  * 
- * VERSION: ConsoleDebug-v4.2 - 修复候选丧尸恒为0与Overlay渲染链路
+ * VERSION: 跟随 RelaxedAimConfig.VERSION（唯一来源）
  */
 @Patch(className = "zombie.gameStates.MainScreenState", methodName = "renderBackground")
 public final class Patch_MainScreenState {
 
     // 【重要】必须public，否则ZombieBuddy无法访问导致IllegalAccessError
     public static boolean logged = false;
-
-    // 版本标识
-    public static final String VERSION = "ConsoleDebug-v4.2";
-    public static final String BUILD_TIME = "2026-08-14";
 
     private Patch_MainScreenState() {
     }
@@ -36,7 +32,7 @@ public final class Patch_MainScreenState {
                 UIFont.Medium,
                 8,
                 8,
-                "RelaxedAim " + VERSION,
+                "RelaxedAim " + RelaxedAimConfig.VERSION,
                 0.55,
                 1.0,
                 0.55,
@@ -49,10 +45,8 @@ public final class Patch_MainScreenState {
         if (!logged) {
             logged = true;
             System.out.println("[RelaxedAim] ========================================");
-            System.out.println("[RelaxedAim] RelaxedAim " + VERSION + " loaded");
-            System.out.println("[RelaxedAim] Build: " + BUILD_TIME);
-            System.out.println("[RelaxedAim] Mode: EndFrameUI Overlay + Console Debug (aiming only)");
-            System.out.println("[RelaxedAim] Fix: Use Callbacks.onEndFrameUI overlay + IsoUtils X/YToScreenExact");
+            System.out.println("[RelaxedAim] RelaxedAim " + RelaxedAimConfig.VERSION + " loaded");
+            System.out.println("[RelaxedAim] Notes: " + RelaxedAimConfig.VERSION_NOTES);
             System.out.println("[RelaxedAim] ========================================");
         }
     }
