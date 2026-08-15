@@ -55,6 +55,7 @@ public final class AimAssistService {
     public static void markNotAiming() {
         debugIsAiming = false;
         debugCandidateCount = 0;
+        debugNearestCandidate = null;
         TargetLockService.clearLock("aim");
     }
 
@@ -68,16 +69,21 @@ public final class AimAssistService {
      * @param playerY 玩家Y坐标
      * @param playerZ 玩家Z坐标
      */
+    /**
+     * 每帧调用（IngameState.renderframeui 顶部，任意状态下都会执行）：
+     * 刷新本地设置 + 热键检测，保证菜单改动与热键在非瞄准状态下也生效。
+     */
+    public static void tickFrame() {
+        try {
+            RelaxedAimConfig.refreshModOptions();
+        } catch (Throwable t) {
+        }
+        checkHotkey();
+    }
+
     public static void updateAiming(IsoPlayer player, int mouseX, int mouseY,
                                      float playerX, float playerY, float playerZ) {
         frameCounter++;
-
-        // 模组选项刷新（1s 节流，读 ModOptions.ini）
-        RelaxedAimConfig.refreshModOptions();
-        // 服务器沙盒设置刷新（1s 节流，辅助强度）
-        RelaxedAimConfig.refreshSandboxOptions();
-        // 临时启用/禁用热键
-        checkHotkey();
 
         // 锁定总开关关闭时：只更新瞄准调试状态，不做候选/锁定
         if (!RelaxedAimConfig.optionLockOn) {
@@ -145,6 +151,8 @@ public final class AimAssistService {
         }
 
         if (weapon == null || !weapon.isRanged()) {
+            debugNearestCandidate = null;
+            debugCandidateCount = 0;
             TargetLockService.clearLock("aim");
             return;
         }
@@ -194,24 +202,48 @@ public final class AimAssistService {
 
     public static int playerIndex = -1;
 
-    /** 键位名（与 Lua 里追加的 keyBinding.value 一致，玩家可在 设置→键位 中重设）。 */
-    public static final String TOGGLE_KEY = "Toggle RelaxedAim";
-    public static boolean keybindRegistered = false;
-
     /**
-     * 临时启用/禁用热键：首次调用时用默认键（H=35）注册到 Core（若已被玩家重设则使用其设定键），
-     * 之后每帧检查边缘触发切换 optionLockOn。
+     * 临时启用/禁用热键（PZAPI keybind，玩家可在 模组设置 中自定义按键）：
+     * 任意状态下按下均生效，并在角色头顶显示「辅助瞄准：开/关」提示（跟随系统语言）。
      */
     public static void checkHotkey() {
         try {
-            if (!keybindRegistered) {
-                keybindRegistered = true;
-                zombie.core.Core.getInstance().addKeyBinding(TOGGLE_KEY, 35, 0, false, false, false);
-            }
-            if (zombie.input.GameKeyboard.isKeyPressed(TOGGLE_KEY)) {
+            if (zombie.input.GameKeyboard.isKeyPressed(RelaxedAimConfig.optionToggleKey)) {
                 RelaxedAimConfig.optionLockOn = !RelaxedAimConfig.optionLockOn;
                 TargetLockService.clearLock("toggle");
                 System.out.println("[RelaxedAim] Hotkey toggle -> LockOn=" + RelaxedAimConfig.optionLockOn);
+                showHaloToggleText();
+            }
+        } catch (Throwable t) {
+        }
+    }
+
+    /** 角色头顶显示「辅助瞄准：开/关」，跟随系统语言。 */
+    public static void showHaloToggleText() {
+        try {
+            final zombie.characters.IsoPlayer player = zombie.characters.IsoPlayer.getInstance();
+            if (player == null) {
+                return;
+            }
+            final String key = RelaxedAimConfig.optionLockOn ? "UI_RelaxedAim_On" : "UI_RelaxedAim_Off";
+            String text = key;
+            try {
+                final Object fn = zombie.Lua.LuaManager.env.rawget("getText");
+                if (fn instanceof se.krka.kahlua.vm.JavaFunction
+                        || fn instanceof se.krka.kahlua.vm.LuaClosure) {
+                    final Object[] result = zombie.Lua.LuaManager.caller
+                            .pcall(zombie.Lua.LuaManager.thread, fn, key);
+                    if (result != null && result.length > 0 && result[0] instanceof String
+                            && ((String) result[0]).length() > 0) {
+                        text = (String) result[0];
+                    }
+                }
+            } catch (Throwable t) {
+            }
+            if (RelaxedAimConfig.optionLockOn) {
+                zombie.characters.HaloTextHelper.addGoodText(player, text);
+            } else {
+                zombie.characters.HaloTextHelper.addBadText(player, text);
             }
         } catch (Throwable t) {
         }
@@ -227,21 +259,28 @@ public final class AimAssistService {
         return playerIndex;
     }
 
-    /** 判断武器是否为霰弹枪：弹药类型为 shotgun_shells（覆盖所有原版霰弹枪）。 */
+    /** 判断武器是否为霰弹枪：弹药类型为 shotgun_shells 或弹药箱/名称含 shotgun（覆盖原版全部霰弹枪）。 */
     public static boolean isShotgun(HandWeapon weapon) {
         try {
             if (weapon == null) {
                 return false;
             }
             final zombie.scripting.objects.AmmoType at = weapon.getAmmoType();
-            if (at == null) {
-                return false;
+            if (at != null) {
+                if (at == zombie.scripting.objects.AmmoType.SHOTGUN_SHELLS) {
+                    return true;
+                }
+                final String key = at.getItemKey();
+                if (key != null && key.toLowerCase().contains("shotgun")) {
+                    return true;
+                }
             }
-            if (at == zombie.scripting.objects.AmmoType.SHOTGUN_SHELLS) {
+            final String ammoBox = weapon.getAmmoBox();
+            if (ammoBox != null && ammoBox.toLowerCase().contains("shotgun")) {
                 return true;
             }
-            final String key = at.getItemKey();
-            if (key != null && key.toLowerCase().contains("shotgun")) {
+            final String name = weapon.getName();
+            if (name != null && name.toLowerCase().contains("shotgun")) {
                 return true;
             }
         } catch (Exception e) {

@@ -30,6 +30,9 @@ public final class Patch_IngameState {
             System.out.println("[RelaxedAim] Patch_IngameState initialized (update-only)");
         }
 
+        // 每帧（任意状态）刷新配置 + 检测热键，保证菜单改动与快捷键在非瞄准状态也生效
+        AimAssistService.tickFrame();
+
         // 【安全检查1】确保游戏世界实例存在
         if (IsoWorld.instance == null) {
             return;

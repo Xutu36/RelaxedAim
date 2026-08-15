@@ -194,27 +194,31 @@ public final class TargetLockService {
     public static float smoothY = 0.0f;
     public static long smoothLastMs = 0L;
 
+    /** 强锁定状态：准心进入强锁定阈值内后完全吸附头部，不再平滑；换目标后重置。 */
+    public static boolean strongLock = false;
+
     /**
-     * 平滑时间（毫秒）：辅助强度与 Aiming 瞄准等级共同决定。
-     * 强度越高/等级越高 → 时间越短（吸附越快）。
+     * 平滑时间（毫秒）：对数衰减公式（瞄准等级收益递减）。
+     * effect = clamp(assist * snapStrengthScale, 0, 1) * ln(1+aimLevel)/ln(1+snapAimCap)
+     * snapTime = snapMaxMs - (snapMaxMs - snapMinMs) * effect
      */
     public static float computeSnapTimeMs(int pIndex) {
         try {
-            float assist = RelaxedAimConfig.assistStrength;
+            final float effect = Math.min(1f, Math.max(0f, RelaxedAimConfig.assistStrength
+                    * RelaxedAimConfig.snapStrengthScale));
             int aimLevel = 0;
             try {
                 aimLevel = zombie.characters.IsoPlayer.getPlayer(pIndex)
                         .getPerkLevel(zombie.characters.skills.PerkFactory.Perks.Aiming);
             } catch (Exception e) {
             }
-            float ms = 1500.0f - assist * 1000.0f - aimLevel * 50.0f;
-            if (ms < 100.0f) {
-                ms = 100.0f;
-            }
-            if (ms > 1500.0f) {
-                ms = 1500.0f;
-            }
-            return ms;
+            final float cap = Math.max(1f, RelaxedAimConfig.snapAimCap);
+            final float gain = (float) (Math.log(1.0 + aimLevel) / Math.log(1.0 + cap));
+            float ms = RelaxedAimConfig.snapMaxMs
+                    - (RelaxedAimConfig.snapMaxMs - RelaxedAimConfig.snapMinMs) * effect * gain;
+            final float min = Math.max(10f, RelaxedAimConfig.snapMinMs);
+            final float max = Math.max(min, RelaxedAimConfig.snapMaxMs);
+            return ms < min ? min : (ms > max ? max : ms);
         } catch (Exception e) {
             return 500.0f;
         }
@@ -231,6 +235,12 @@ public final class TargetLockService {
             headAimWorldPos(lockedTarget, sHeadPos);
             final float tx = worldScreenX(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
             final float ty = worldScreenY(sHeadPos.x, sHeadPos.y, sHeadPos.z, pIndex);
+            // 强锁定：完全吸附头部，不再平滑
+            if (strongLock) {
+                smoothX = tx;
+                smoothY = ty;
+                return;
+            }
             final long now = System.currentTimeMillis();
             if (!smoothInit) {
                 smoothInit = true;
@@ -256,6 +266,13 @@ public final class TargetLockService {
             final float k = (float) Math.min(1.0, dt / (snapMs * 0.33f));
             smoothX += (tx - smoothX) * k;
             smoothY += (ty - smoothY) * k;
+            // 进入强锁定阈值：此后完全吸附头部
+            final float dx = smoothX - tx;
+            final float dy = smoothY - ty;
+            if (dx * dx + dy * dy < RelaxedAimConfig.STRONG_LOCK_THRESHOLD_PX
+                    * RelaxedAimConfig.STRONG_LOCK_THRESHOLD_PX) {
+                strongLock = true;
+            }
         } catch (Exception e) {
         }
     }
@@ -366,8 +383,10 @@ public final class TargetLockService {
                 updateDebug();
                 return; // 锁定仍有效，保持不变（滞回区）
             }
-            // 保持时间：非「死亡」原因在短暂失效时暂不释放（遮挡/鼠标短暂偏离等）
-            if (!"dead".equals(pendingReleaseReason) && RelaxedAimConfig.optionLockHoldTimeMs > 0) {
+            // 保持时间：非「死亡/鼠标移出」原因在短暂失效时暂不释放（遮挡等）；
+            // 鼠标移出（"mouse"）为主动切换意图，立即释放并重筛。
+            if (!"dead".equals(pendingReleaseReason) && !"mouse".equals(pendingReleaseReason)
+                    && RelaxedAimConfig.optionLockHoldTimeMs > 0) {
                 final long now = System.currentTimeMillis();
                 if (invalidSinceMs == 0L) {
                     invalidSinceMs = now;
@@ -484,6 +503,9 @@ public final class TargetLockService {
             lockedTarget = best;
             lockWorldDist = bestWorldDist;
             lockScreenDist = bestScreenDist;
+            // 新目标：重置强锁定，重新平滑吸附
+            strongLock = false;
+            smoothInit = false;
             System.out.println("[RelaxedAim] LOCK acquired: zombieId=" + safeId(best)
                     + " worldDist=" + String.format("%.2f", lockWorldDist)
                     + " screenDist=" + String.format("%.1f", lockScreenDist));
@@ -511,6 +533,8 @@ public final class TargetLockService {
         debugReleaseReason = reason;
         debugReleaseTimeMs = System.currentTimeMillis();
         lockedTarget = null;
+        strongLock = false;
+        smoothInit = false;
     }
 
     public static int safeId(IsoZombie z) {

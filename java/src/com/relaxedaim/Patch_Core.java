@@ -86,6 +86,48 @@ public final class Patch_Core {
 
         // 锁定辅助 UI：范围圈 / 头部锁定指示（紫色圈，锁定目标或最近候选）
         drawLockAssistUI();
+
+        // 临时调试 HUD：显示配置读取状态与系统语言（定位配置未生效/翻译问题，测试后移除）
+        drawTempDebugHud();
+    }
+
+    /** 临时调试 HUD：右侧面板下方，始终绘制（不受 showHud 控制）。 */
+    public static void drawTempDebugHud() {
+        try {
+            final UIFont font = UIFont.Small;
+            final int screenW;
+            try {
+                screenW = Core.width;
+            } catch (Exception e) {
+                return;
+            }
+            int lineH = 16;
+            try {
+                lineH = Math.max(14, (int) TextManager.instance.MeasureStringY(font, "Ag"));
+            } catch (Exception e) {
+            }
+            int y = 270;
+
+            String lang = "?";
+            try {
+                lang = zombie.core.Core.getInstance().getOptionLanguageName();
+            } catch (Exception e) {
+            }
+            java.io.File f = null;
+            try {
+                f = RelaxedAimConfig.getModOptionsFile();
+            } catch (Exception e) {
+            }
+            final String fExists = (f != null && f.exists()) ? "YES" : "NO";
+
+            addRightLine(font, screenW, y, "[DBG] readFailed=" + RelaxedAimConfig.optionsReadFailed, 1.0f, 0.8f, 0.3f, 1.0f);
+            y += lineH;
+            addRightLine(font, screenW, y, "[DBG] Lang=" + lang, 0.6f, 1.0f, 0.6f, 1.0f);
+            y += lineH;
+            addRightLine(font, screenW, y, "[DBG] ModOptions.ini exists=" + fExists
+                    + (f != null ? " (" + f.getPath() + ")" : ""), 0.7f, 0.8f, 1.0f, 1.0f);
+        } catch (Exception e) {
+        }
     }
 
     /** 右侧对齐调试面板：zoom、鼠标原始/虚拟坐标、锁定目标虚拟/UI 坐标及相对差。 */
@@ -183,10 +225,15 @@ public final class Patch_Core {
         }
     }
 
+    /** 范围圈动画半径（瓦片）：未锁定时收敛到捕获半径，锁定时平滑扩到释放半径。 */
+    public static float uiRangeRadiusTiles = 1.5f;
+
     /**
-     * 锁定辅助 UI（由两个 bool 控制，见 RelaxedAimConfig）：
-     *  - optionShowLockRange：以当前世界瞄准点为中心画锁定范围圈（半径 lockRadiusWorld）。
-     *  - optionHighlightNearest：高亮范围内最近将被锁定的丧尸。
+     * 锁定辅助 UI（核心交互指示，由 optionLockOn 统一控制）：
+     *  - 青色范围圈：始终跟随玩家鼠标（原始鼠标瞄准点），未锁定时为捕获半径
+     *    （指示「现在瞄准哪一片」），锁定后平滑扩大到释放半径
+     *    （lockRadiusWorld × reFilterMultiplier，指示「鼠标偏多少会切换/丢失目标」）。
+     *  - 紫色圈：画在将被/正在锁定丧尸的头部骨骼处。
      */
     public static void drawLockAssistUI() {
         if (!RelaxedAimConfig.optionLockOn) {
@@ -208,40 +255,56 @@ public final class Patch_Core {
         } catch (Exception e) {
         }
 
+        // 仅远程武器显示锁定圈；霰弹枪且启用「霰弹枪不锁定」时也不显示
+        try {
+            final zombie.inventory.types.HandWeapon weapon = AimAssistService.getActiveWeapon(player);
+            if (weapon == null || !weapon.isRanged()) {
+                return;
+            }
+            if (RelaxedAimConfig.optionShotgunNoLock && AimAssistService.isShotgun(weapon)) {
+                return;
+            }
+        } catch (Exception e) {
+            return;
+        }
+
         final Texture white = Texture.getWhite();
         final SpriteRenderer sr = SpriteRenderer.instance;
         final float lw = 1.5f;
 
-        // 范围圈
-        if (RelaxedAimConfig.optionShowLockRange && TargetLockService.aimWorldValid) {
+        // 青色范围圈：始终跟随鼠标（原始鼠标瞄准点）
+        if (TargetLockService.rawAimWorldValid) {
             try {
                 final float zoom = TargetLockService.getZoom(pIndex);
-                final float cx = TargetLockService.worldScreenX(TargetLockService.aimWorldX,
-                        TargetLockService.aimWorldY, TargetLockService.aimWorldZ, pIndex);
-                final float cy = TargetLockService.worldScreenY(TargetLockService.aimWorldX,
-                        TargetLockService.aimWorldY, TargetLockService.aimWorldZ, pIndex);
-                // 屏幕像素半径 ≈ 世界瓦片 × 32 × tileScale / zoom（iso 近似，用户可按 bool 取舍）
-                final float radius = RelaxedAimConfig.optionLockRadiusWorld * 32.0f * zombie.core.Core.tileScale / zoom;
+                final float cx = TargetLockService.worldScreenX(TargetLockService.rawAimWorldX,
+                        TargetLockService.rawAimWorldY, TargetLockService.rawAimWorldZ, pIndex);
+                final float cy = TargetLockService.worldScreenY(TargetLockService.rawAimWorldX,
+                        TargetLockService.rawAimWorldY, TargetLockService.rawAimWorldZ, pIndex);
+                // 目标半径：锁定后为释放半径（捕获 × reFilter）
+                final float targetTiles = TargetLockService.getLockedTarget() != null
+                        ? RelaxedAimConfig.optionLockRadiusWorld * RelaxedAimConfig.reFilterMultiplier
+                        : RelaxedAimConfig.optionLockRadiusWorld;
+                // 平滑过渡（渐阔/渐收）
+                uiRangeRadiusTiles += (targetTiles - uiRangeRadiusTiles) * 0.1f;
+                final float radius = uiRangeRadiusTiles * 32.0f * zombie.core.Core.tileScale / zoom;
                 drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, 0.6f * RelaxedAimConfig.optionHudAlpha, lw);
             } catch (Exception e) {
             }
         }
 
         // 紫色圈：画在「将被/正在锁定」丧尸头部骨骼（Bip01_Head）精确位置，有锁定时指向锁定目标，否则最近候选
-        if (RelaxedAimConfig.optionHighlightNearest) {
-            final IsoZombie n = TargetLockService.getLockedTarget() != null
-                    ? TargetLockService.getLockedTarget()
-                    : AimAssistService.debugNearestCandidate;
-            if (n != null) {
-                try {
-                    TargetLockService.headAimWorldPos(n, TargetLockService.sHeadPos);
-                    final float nx = TargetLockService.worldScreenX(TargetLockService.sHeadPos.x,
-                            TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
-                    final float ny = TargetLockService.worldScreenY(TargetLockService.sHeadPos.x,
-                            TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
-                    drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f * RelaxedAimConfig.optionHudAlpha, lw);
-                } catch (Exception e) {
-                }
+        final IsoZombie n = TargetLockService.getLockedTarget() != null
+                ? TargetLockService.getLockedTarget()
+                : AimAssistService.debugNearestCandidate;
+        if (n != null) {
+            try {
+                TargetLockService.headAimWorldPos(n, TargetLockService.sHeadPos);
+                final float nx = TargetLockService.worldScreenX(TargetLockService.sHeadPos.x,
+                        TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
+                final float ny = TargetLockService.worldScreenY(TargetLockService.sHeadPos.x,
+                        TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
+                drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f * RelaxedAimConfig.optionHudAlpha, lw);
+            } catch (Exception e) {
             }
         }
     }
