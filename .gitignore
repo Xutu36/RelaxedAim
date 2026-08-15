@@ -1,5 +1,39 @@
-.gradle/
+# ---- Gradle / Java ----
 java/.gradle/
 java/build/
+java/bin/
+.gradle/
+*.class
+
+# 本机 Gradle 配置（含 JDK 路径与签名私钥路径，勿提交）
+java/gradle.properties
+
+# 构建产物 JAR（保留 .gitkeep）与签名文件
 42/media/java/client/*.jar
 !42/media/java/client/.gitkeep
+42/media/java/client/*.jar.zbs
+*.zbs
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 签名私钥（切勿提交）----
+*.der
+*.key
+*.pem
+*.pfx
+signing/ed25519-private.der
+
+# ---- 本地运行/日志产物 ----
+console.txt
+*.log
+logs/

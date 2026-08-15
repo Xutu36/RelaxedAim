@@ -192,7 +192,7 @@ public final class TargetLockService {
     public static boolean smoothInit = false;
     public static float smoothX = 0.0f;
     public static float smoothY = 0.0f;
-    public static long smoothLastMs = 0L;
+    public static long snapStartMs = 0L;
 
     /** 强锁定状态：准心进入强锁定阈值内后完全吸附头部，不再平滑；换目标后重置。 */
     public static boolean strongLock = false;
@@ -224,7 +224,12 @@ public final class TargetLockService {
         }
     }
 
-    /** 每帧推进一次平滑值（以帧号去重）。 */
+    /**
+     * 每帧推进一次平滑值（以帧号去重）。
+     * 用「线性进度」趋近：progress = elapsed/snapTime，f = progress²（加速趋近），
+     * 保证在 snapTime 内必然到达头部（progress=1 时 f=1 → 精确锁定），
+     * 无论目标以何种速度移动，实际辅助锁定耗时都不会超过期望值。
+     */
     public static void updateLockedSmooth(int pIndex) {
         final int frame = AimAssistService.frameCounter;
         if (frame == smoothFrameStamp) {
@@ -246,26 +251,20 @@ public final class TargetLockService {
                 smoothInit = true;
                 smoothX = zombie.input.Mouse.getXA();
                 smoothY = zombie.input.Mouse.getYA();
-                smoothLastMs = now;
-            }
-            float dt = now - smoothLastMs;
-            smoothLastMs = now;
-            if (dt < 0f) {
-                dt = 0f;
-            }
-            if (dt > 100f) {
-                dt = 100f;
+                snapStartMs = now;
             }
             final float snapMs = computeSnapTimeMs(pIndex);
-            if (snapMs <= 0f) {
-                smoothX = tx;
-                smoothY = ty;
-                return;
+            float progress = snapMs <= 0f ? 1f : (now - snapStartMs) / snapMs;
+            if (progress < 0f) {
+                progress = 0f;
             }
-            // 指数趋近：时间常数 = snapMs/3（约一个 snapMs 达到 ~95%）
-            final float k = (float) Math.min(1.0, dt / (snapMs * 0.33f));
-            smoothX += (tx - smoothX) * k;
-            smoothY += (ty - smoothY) * k;
+            if (progress > 1f) {
+                progress = 1f;
+            }
+            // 加速趋近：progress=1 时 f=1 → 精确到达当前头部位置
+            final float f = progress * progress;
+            smoothX += (tx - smoothX) * f;
+            smoothY += (ty - smoothY) * f;
             // 进入强锁定阈值：此后完全吸附头部
             final float dx = smoothX - tx;
             final float dy = smoothY - ty;
@@ -282,7 +281,7 @@ public final class TargetLockService {
      * 供 AimingReticle.getXA/getYA 覆盖判定使用。
      */
     public static boolean isLockAimingActive(int pIndex) {
-        if (!RelaxedAimConfig.optionLockOn || lockedTarget == null) {
+        if (!RelaxedAimConfig.isLockOnEffective() || lockedTarget == null) {
             return false;
         }
         try {
@@ -383,10 +382,18 @@ public final class TargetLockService {
                 updateDebug();
                 return; // 锁定仍有效，保持不变（滞回区）
             }
-            // 保持时间：非「死亡/鼠标移出」原因在短暂失效时暂不释放（遮挡等）；
-            // 鼠标移出（"mouse"）为主动切换意图，立即释放并重筛。
-            if (!"dead".equals(pendingReleaseReason) && !"mouse".equals(pendingReleaseReason)
-                    && RelaxedAimConfig.optionLockHoldTimeMs > 0) {
+            // 保持时间：非「死亡」原因在短暂失效时暂不释放；鼠标移出为主动切换意图，立即释放。
+            // 例外：击倒/倒地中的丧尸（击倒位移属瞬时，且可能在锁定圈内）即使 mouse 原因也享受保持。
+            boolean holdAllowed = !"dead".equals(pendingReleaseReason);
+            if ("mouse".equals(pendingReleaseReason)) {
+                boolean down = false;
+                try {
+                    down = lockedTarget.isKnockedDown() || lockedTarget.isProne();
+                } catch (Exception e) {
+                }
+                holdAllowed = down;
+            }
+            if (holdAllowed && RelaxedAimConfig.optionLockHoldTimeMs > 0) {
                 final long now = System.currentTimeMillis();
                 if (invalidSinceMs == 0L) {
                     invalidSinceMs = now;
@@ -433,8 +440,15 @@ public final class TargetLockService {
                 pendingReleaseReason = "dead";
                 return false;
             }
-            if (Math.abs(z.getZ() - player.getZ()) > AimAssistService.FLOOR_TOLERANCE) {
+            // 击倒/倒地丧尸：放宽楼层判定、跳过遮挡判定（倒地时这些检查易误判导致丢锁定）
+            final boolean down = z.isKnockedDown() || z.isProne();
+            final float floorTol = down ? 2.0f : AimAssistService.FLOOR_TOLERANCE;
+            if (Math.abs(z.getZ() - player.getZ()) > floorTol) {
                 pendingReleaseReason = "floor";
+                return false;
+            }
+            if (!down && z.getSquare() != null && !z.getSquare().getCanSee(lockPlayerIndex)) {
+                pendingReleaseReason = "occluded";
                 return false;
             }
             if (weapon == null || !weapon.isRanged()) {
@@ -446,10 +460,6 @@ public final class TargetLockService {
             final float lockMax = RelaxedAimConfig.optionMaxLockDistance;
             if (worldDist > (lockMax > 0f && lockMax < maxRange ? lockMax : maxRange)) {
                 pendingReleaseReason = "range";
-                return false;
-            }
-            if (z.getSquare() != null && !z.getSquare().getCanSee(lockPlayerIndex)) {
-                pendingReleaseReason = "occluded";
                 return false;
             }
             // 释放/重筛用「原始鼠标」世界瞄准点（reticle 覆盖期间 aimWorld 恒为锁定目标，不可用于释放判定）

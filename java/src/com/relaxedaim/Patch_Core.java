@@ -48,7 +48,7 @@ public final class Patch_Core {
             y += lineH;
             draw(font, x, y, "ZombiesInCell: " + AimAssistService.debugTotalZombies + " | Candidates: " + AimAssistService.debugCandidateCount, 1.0f, 1.0f, 0.0f, 1.0f);
             y += lineH;
-            draw(font, x, y, "Options: LockOn=" + (RelaxedAimConfig.optionLockOn ? "ON" : "OFF")
+            draw(font, x, y, "Options: LockOn=" + (RelaxedAimConfig.isLockOnEffective() ? "ON" : "OFF")
                     + " | Assist=" + String.format("%.2f", RelaxedAimConfig.assistStrength)
                     + " | Skip=" + AimAssistService.debugSkipReason
                     + (RelaxedAimConfig.optionsReadFailed ? " [READ FAILED]" : ""), 0.7f, 0.8f, 1.0f, 1.0f);
@@ -82,13 +82,13 @@ public final class Patch_Core {
 
             // 右侧调试面板：实时打印鼠标与锁定目标的关键相对位置
             drawRightPanel();
+
+            // 临时调试 HUD：显示配置读取状态与系统语言（受 showHud 控制，测试后移除）
+            drawTempDebugHud();
         }
 
         // 锁定辅助 UI：范围圈 / 头部锁定指示（紫色圈，锁定目标或最近候选）
         drawLockAssistUI();
-
-        // 临时调试 HUD：显示配置读取状态与系统语言（定位配置未生效/翻译问题，测试后移除）
-        drawTempDebugHud();
     }
 
     /** 临时调试 HUD：右侧面板下方，始终绘制（不受 showHud 控制）。 */
@@ -236,7 +236,7 @@ public final class Patch_Core {
      *  - 紫色圈：画在将被/正在锁定丧尸的头部骨骼处。
      */
     public static void drawLockAssistUI() {
-        if (!RelaxedAimConfig.optionLockOn) {
+        if (!RelaxedAimConfig.isLockOnEffective()) {
             return;
         }
         if (IsoWorld.instance == null || IsoWorld.instance.currentCell == null) {

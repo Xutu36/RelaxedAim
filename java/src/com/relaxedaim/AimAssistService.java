@@ -86,7 +86,7 @@ public final class AimAssistService {
         frameCounter++;
 
         // 锁定总开关关闭时：只更新瞄准调试状态，不做候选/锁定
-        if (!RelaxedAimConfig.optionLockOn) {
+        if (!RelaxedAimConfig.isLockOnEffective()) {
             debugIsAiming = true;
             debugCandidateCount = 0;
             debugSkipReason = "lockoff";
@@ -204,46 +204,31 @@ public final class AimAssistService {
 
     /**
      * 临时启用/禁用热键（PZAPI keybind，玩家可在 模组设置 中自定义按键）：
-     * 任意状态下按下均生效，并在角色头顶显示「辅助瞄准：开/关」提示（跟随系统语言）。
+     * 翻转 hotkeyToggled（不写配置文件，避免被刷新覆盖），并通知 Lua 显示头顶提示。
      */
     public static void checkHotkey() {
         try {
             if (zombie.input.GameKeyboard.isKeyPressed(RelaxedAimConfig.optionToggleKey)) {
-                RelaxedAimConfig.optionLockOn = !RelaxedAimConfig.optionLockOn;
+                RelaxedAimConfig.hotkeyToggled = !RelaxedAimConfig.hotkeyToggled;
                 TargetLockService.clearLock("toggle");
-                System.out.println("[RelaxedAim] Hotkey toggle -> LockOn=" + RelaxedAimConfig.optionLockOn);
-                showHaloToggleText();
+                System.out.println("[RelaxedAim] Hotkey toggle -> effective LockOn="
+                        + RelaxedAimConfig.isLockOnEffective());
+                writeToggleNotify();
             }
         } catch (Throwable t) {
         }
     }
 
-    /** 角色头顶显示「辅助瞄准：开/关」，跟随系统语言。 */
-    public static void showHaloToggleText() {
+    /** 写入 Lua 全局，由 RelaxedAim_Hotkey.lua 在下一帧用 getText 显示头顶提示（跟随系统语言）。 */
+    public static void writeToggleNotify() {
         try {
-            final zombie.characters.IsoPlayer player = zombie.characters.IsoPlayer.getInstance();
-            if (player == null) {
-                return;
-            }
-            final String key = RelaxedAimConfig.optionLockOn ? "UI_RelaxedAim_On" : "UI_RelaxedAim_Off";
-            String text = key;
-            try {
-                final Object fn = zombie.Lua.LuaManager.env.rawget("getText");
-                if (fn instanceof se.krka.kahlua.vm.JavaFunction
-                        || fn instanceof se.krka.kahlua.vm.LuaClosure) {
-                    final Object[] result = zombie.Lua.LuaManager.caller
-                            .pcall(zombie.Lua.LuaManager.thread, fn, key);
-                    if (result != null && result.length > 0 && result[0] instanceof String
-                            && ((String) result[0]).length() > 0) {
-                        text = (String) result[0];
-                    }
-                }
-            } catch (Throwable t) {
-            }
-            if (RelaxedAimConfig.optionLockOn) {
-                zombie.characters.HaloTextHelper.addGoodText(player, text);
-            } else {
-                zombie.characters.HaloTextHelper.addBadText(player, text);
+            final boolean on = RelaxedAimConfig.isLockOnEffective();
+            final String key = on ? "UI_RelaxedAim_On" : "UI_RelaxedAim_Off";
+            final se.krka.kahlua.vm.KahluaTable env = zombie.Lua.LuaManager.env;
+            if (env != null) {
+                env.rawset("RelaxedAimToggleNotify", Boolean.TRUE);
+                env.rawset("RelaxedAimToggleText", key);
+                env.rawset("RelaxedAimToggleOn", Boolean.valueOf(on));
             }
         } catch (Throwable t) {
         }
@@ -343,7 +328,7 @@ public final class AimAssistService {
                 continue;
             }
 
-            // Floor check
+            // Floor check（击倒/倒地丧尸放宽楼层）
             float zombieZ;
             try {
                 zombieZ = zombie.getZ();
@@ -351,7 +336,13 @@ public final class AimAssistService {
                 continue; // 无法获取Z坐标，跳过
             }
 
-            if (Math.abs(zombieZ - playerZ) > FLOOR_TOLERANCE) {
+            boolean down = false;
+            try {
+                down = zombie.isKnockedDown() || zombie.isProne();
+            } catch (Exception e) {
+            }
+            final float floorTol = down ? 2.0f : FLOOR_TOLERANCE;
+            if (Math.abs(zombieZ - playerZ) > floorTol) {
                 rejectedFloor++;
                 continue;
             }
@@ -369,9 +360,9 @@ public final class AimAssistService {
                 continue;
             }
 
-            // Visibility check
+            // Visibility check（击倒/倒地丧尸跳过，避免误判遮挡）
             try {
-                if (zombie.getSquare() != null && !zombie.getSquare().getCanSee(playerIndex)) {
+                if (!down && zombie.getSquare() != null && !zombie.getSquare().getCanSee(playerIndex)) {
                     rejectedVisibility++;
                     continue;
                 }

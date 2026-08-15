@@ -23,24 +23,6 @@ options:addDescription("UI_RelaxedAim_MaxLockDistance_desc")
 config.lockHoldTimeMs = options:addSlider("lockHoldTimeMs", "UI_RelaxedAim_LockHoldTimeMs", 0, 3000, 100, 500, "UI_RelaxedAim_LockHoldTimeMs_desc")
 options:addDescription("UI_RelaxedAim_LockHoldTimeMs_desc")
 
--- UI
-config.showHud = options:addTickBox("showHud", "UI_RelaxedAim_ShowHud", true, "UI_RelaxedAim_ShowHud_desc")
-options:addDescription("UI_RelaxedAim_ShowHud_desc")
-
-config.hudAlpha = options:addSlider("hudAlpha", "UI_RelaxedAim_HudAlpha", 0.0, 1.0, 0.05, 1.0, "UI_RelaxedAim_HudAlpha_desc")
-options:addDescription("UI_RelaxedAim_HudAlpha_desc")
-
--- showHud 关闭时隐藏/失活 hudAlpha
-local function syncHudAlphaEnabled()
-    if config.hudAlpha and config.hudAlpha.setEnabled then
-        config.hudAlpha:setEnabled(config.showHud:getValue() == true)
-    end
-end
-config.showHud.onChange = function(self, selected)
-    syncHudAlphaEnabled()
-end
-syncHudAlphaEnabled()
-
 config.shotgunNoLock = options:addTickBox("shotgunNoLock", "UI_RelaxedAim_ShotgunNoLock", true, "UI_RelaxedAim_ShotgunNoLock_desc")
 options:addDescription("UI_RelaxedAim_ShotgunNoLock_desc")
 

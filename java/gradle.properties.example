@@ -1,0 +1,11 @@
+# 本机配置，勿提交（.gitignore 已忽略 gradle.properties）。
+# 复制为 gradle.properties 后按需修改。java.home 指向本机 JDK。
+
+# 构建工具 JDK 路径（本机路径）
+org.gradle.java.home=E:/JDK25
+
+# ---------- ZombieBuddy JAR 签名（可选，配置后 build 会生成 .zbs） ----------
+# 你的 SteamID64（https://steamid.io/ 可查）
+zbsSteamID64=76561198090292133
+# Ed25519 私钥路径（signing/GenKey.java 生成；私钥保密，勿提交仓库）
+zbsPrivateKeyFile=

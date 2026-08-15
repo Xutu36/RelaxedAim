@@ -16,19 +16,27 @@ import java.io.InputStreamReader;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v2.3";
-    public static final String VERSION_NOTES = "热键默认0(48); 修复RunLua取文本(改LuaCaller); 自定义键位捕获修复换绑报错; 翻译移至common+CN语言码; 锁定圈释放排除mouse(鼠标移出立即释放); 定稿公式参数硬编码; 内联描述";
+    public static final String VERSION = "Lock-v2.6";
+    public static final String VERSION_NOTES = "移除OverlayHUD配置项(showHud/hudAlpha,发布默认隐藏); 重新签名(ZBS)";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
-    /** 启用丧尸自动锁定。默认 true。 */
+    /** 启用丧尸自动锁定（基础值，来自模组设置）。默认 true。 */
     public static boolean optionLockOn = true;
+
+    /** 热键翻转标志：临时启用/禁用（不写入配置文件，避免被配置刷新覆盖）。 */
+    public static boolean hotkeyToggled = false;
+
+    /** 实际是否启用辅助 = 基础值 XOR 热键翻转。 */
+    public static boolean isLockOnEffective() {
+        return optionLockOn != hotkeyToggled;
+    }
 
     /** 装备霰弹枪瞄准时取消辅助锁定。默认 true。 */
     public static boolean optionShotgunNoLock = true;
 
     /** 显示 OverlayHUD（调试信息与右侧面板）。发布时设 false。默认 true。 */
-    public static boolean optionShowHud = true;
+    public static boolean optionShowHud = false;
 
     /** OverlayHUD 透明度（0-1）。默认 1.0。 */
     public static float optionHudAlpha = 1.0f;
@@ -96,8 +104,6 @@ public final class RelaxedAimConfig {
             }
             boolean lockOn = optionLockOn;
             boolean shotgunNoLock = optionShotgunNoLock;
-            boolean showHud = optionShowHud;
-            float hudAlpha = optionHudAlpha;
             float lockRadiusWorld = optionLockRadiusWorld;
             float maxLockDistance = optionMaxLockDistance;
             int lockHoldTimeMs = optionLockHoldTimeMs;
@@ -113,10 +119,6 @@ public final class RelaxedAimConfig {
                         lockOn = Boolean.parseBoolean(val);
                     } else if ("shotgunNoLock".equals(id)) {
                         shotgunNoLock = Boolean.parseBoolean(val);
-                    } else if ("showHud".equals(id)) {
-                        showHud = Boolean.parseBoolean(val);
-                    } else if ("hudAlpha".equals(id)) {
-                        hudAlpha = clamp01(parseFloat(val, optionHudAlpha));
                     } else if ("lockRadius".equals(id)) {
                         lockRadiusWorld = parseFloat(val, optionLockRadiusWorld);
                     } else if ("maxLockDistance".equals(id)) {
@@ -131,8 +133,6 @@ public final class RelaxedAimConfig {
             br.close();
             optionLockOn = lockOn;
             optionShotgunNoLock = shotgunNoLock;
-            optionShowHud = showHud;
-            optionHudAlpha = hudAlpha;
             optionLockRadiusWorld = lockRadiusWorld;
             optionMaxLockDistance = maxLockDistance;
             optionLockHoldTimeMs = lockHoldTimeMs;

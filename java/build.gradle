@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    // ZombieBuddy JAR 签名（可选）。需在 gradle.properties 配置 zbsSteamID64 与 zbsPrivateKeyFile，
+    // 否则 signJarZBS 会跳过/失败，不影响普通构建。
+    id 'io.github.zed-0xff.zb-gradle-plugin' version '1.0.0'
 }
 
 def gameDir = file('D:/steam/steamapps/common/ProjectZomboid')
@@ -8,6 +11,11 @@ def zombieBuddyJar = file('D:/steam/steamapps/workshop/content/108600/3619862853
 
 repositories {
     mavenCentral()
+}
+
+// ZombieBuddy 签名配置：签名产物为 RelaxedAim.jar + RelaxedAim.jar.zbs
+zbSigning {
+    jarTask = 'jar'
 }
 
 java {

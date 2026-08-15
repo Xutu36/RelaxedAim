@@ -1,5 +1,5 @@
 {
-    "UI_RelaxedAim_ModName": "RelaxedAim 辅助瞄准",
+    "UI_RelaxedAim_ModName": "忘关就是开了？（辅助瞄准）",
     "UI_RelaxedAim_On": "辅助瞄准：开",
     "UI_RelaxedAim_Off": "辅助瞄准：关",
     "UI_RelaxedAim_PressKey": "请按下按键...",
@@ -8,16 +8,12 @@
     "UI_RelaxedAim_LockOn_desc": "开启后自动锁定准星附近最近的丧尸，并平滑移动准星到其头部；关闭后仅显示HUD信息。",
     "UI_RelaxedAim_ToggleKey": "临时启用/禁用辅助",
     "UI_RelaxedAim_ToggleKey_desc": "按下随时切换辅助瞄准开关。点击该键后按下新键即可更改按键。",
-    "UI_RelaxedAim_LockRadius": "锁定捕获半径（瓦片）",
-    "UI_RelaxedAim_LockRadius_desc": "丧尸距瞄准点该距离（世界瓦片）以内时才会被锁定。",
-    "UI_RelaxedAim_MaxLockDistance": "最大锁定距离（瓦片）",
-    "UI_RelaxedAim_MaxLockDistance_desc": "距离玩家超过该距离的丧尸永不被锁定（同时受武器射程限制）。",
+    "UI_RelaxedAim_LockRadius": "锁定捕获半径（米）",
+    "UI_RelaxedAim_LockRadius_desc": "丧尸距瞄准点该距离（米）以内时才会被锁定。",
+    "UI_RelaxedAim_MaxLockDistance": "最大锁定距离（米）",
+    "UI_RelaxedAim_MaxLockDistance_desc": "距离玩家超过该距离（米）的丧尸永不被锁定（同时受武器射程限制）。",
     "UI_RelaxedAim_LockHoldTimeMs": "锁定保持时间（毫秒）",
     "UI_RelaxedAim_LockHoldTimeMs_desc": "锁定目标短暂失效（如被遮挡）时，锁定保留该时长后再释放；0 表示立即释放。",
-    "UI_RelaxedAim_ShowHud": "显示 Overlay HUD",
-    "UI_RelaxedAim_ShowHud_desc": "显示调试/信息 Overlay HUD。上传创意工坊前请关闭。",
-    "UI_RelaxedAim_HudAlpha": "Overlay UI 透明度",
-    "UI_RelaxedAim_HudAlpha_desc": "叠加 HUD 的不透明度（0-1）。",
     "UI_RelaxedAim_ShotgunNoLock": "装备霰弹枪瞄准时取消辅助锁定",
     "UI_RelaxedAim_ShotgunNoLock_desc": "开启后，使用霰弹枪瞄准（常用于大面积杀伤）时不进行辅助锁定。"
 }
