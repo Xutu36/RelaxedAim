@@ -71,7 +71,7 @@ public final class RelaxedAimConfig {
     public static float snapAimCap = 10f;
 
     /** 强锁定屏幕距离阈值（像素）：准心距锁定头部骨骼小于该值时进入强锁定（完全吸附，不再平滑）。 */
-    public static final float STRONG_LOCK_THRESHOLD_PX = 30f;
+    public static final float STRONG_LOCK_THRESHOLD_PX = 15f;
 
     public static long lastOptionsReadMs = 0L;
     public static final long OPTIONS_REFRESH_MS = 1000L;
