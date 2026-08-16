@@ -49,7 +49,7 @@ public final class Patch_Core {
             draw(font, x, y, "ZombiesInCell: " + AimAssistService.debugTotalZombies + " | Candidates: " + AimAssistService.debugCandidateCount, 1.0f, 1.0f, 0.0f, 1.0f);
             y += lineH;
             draw(font, x, y, "Options: LockOn=" + (RelaxedAimConfig.isLockOnEffective() ? "ON" : "OFF")
-                    + " | Assist=" + String.format("%.2f", RelaxedAimConfig.assistStrength)
+                    + " | Assist=" + String.format("%.2f", RelaxedAimConfig.assistStrength())
                     + " | Skip=" + AimAssistService.debugSkipReason
                     + (RelaxedAimConfig.optionsReadFailed ? " [READ FAILED]" : ""), 0.7f, 0.8f, 1.0f, 1.0f);
             y += lineH;

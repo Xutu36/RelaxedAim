@@ -1,0 +1,5 @@
+{
+    "Sandbox_RelaxedAim": "RelaxedAim（服务器平衡）",
+    "Sandbox_RelaxedAim_AssistStrength": "辅助强度",
+    "Sandbox_RelaxedAim_AssistStrength_tooltip": "与玩家瞄准（Aiming）技能共同决定：从获得锁定单位到准心平滑移动到丧尸头部所需时间。越高吸附越快。服务器端平衡：多人游戏中所有玩家统一使用服务器的值。"
+}

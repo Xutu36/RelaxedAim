@@ -16,8 +16,8 @@ import java.io.InputStreamReader;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v2.6";
-    public static final String VERSION_NOTES = "移除OverlayHUD配置项(showHud/hudAlpha,发布默认隐藏); 重新签名(ZBS)";
+    public static final String VERSION = "Lock-v2.8";
+    public static final String VERSION_NOTES = "平衡定稿(snapMaxMs=1500); 移除全部临时调参配置项; 辅助强度仅取沙盒/服务器值";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
@@ -53,13 +53,10 @@ public final class RelaxedAimConfig {
     /** 临时启用/禁用热键键码（PZAPI keybind，默认顶部数字行 0 = 48）。 */
     public static int optionToggleKey = 48;
 
-    // ---------- 平滑吸附公式参数（已定稿硬编码，非配置项） ----------
-
-    /** 辅助强度：吸附效率公式系数。 */
-    public static float assistStrength = 1.0f;
+    // ---------- 平滑吸附公式参数（已定稿，非配置项） ----------
 
     /** 吸附时间上限（毫秒）。 */
-    public static float snapMaxMs = 1000f;
+    public static float snapMaxMs = 1500f;
 
     /** 吸附时间下限（毫秒）。 */
     public static float snapMinMs = 100f;
@@ -69,6 +66,14 @@ public final class RelaxedAimConfig {
 
     /** 瞄准等级收益封顶（对数衰减）。 */
     public static float snapAimCap = 10f;
+
+    /** 沙盒/服务器辅助强度（SandboxVars.RelaxedAim.AssistStrength），MP 全玩家同步。 */
+    public static float assistStrengthSandbox = 0.5f;
+
+    /** 最终生效的辅助强度（本地临时调参已移除，取沙盒/服务器值）。 */
+    public static float assistStrength() {
+        return assistStrengthSandbox;
+    }
 
     /** 强锁定屏幕距离阈值（像素）：准心距锁定头部骨骼小于该值时进入强锁定（完全吸附，不再平滑）。 */
     public static final float STRONG_LOCK_THRESHOLD_PX = 15f;
@@ -141,6 +146,46 @@ public final class RelaxedAimConfig {
         } catch (Throwable t) {
             optionsReadFailed = true;
         }
+    }
+
+    // ========== 沙盒/服务器设置（SandboxVars.RelaxedAim.AssistStrength） ==========
+
+    public static long lastSandboxReadMs = 0L;
+    public static final long SANDBOX_REFRESH_MS = 1000L;
+
+    /** 节流刷新沙盒辅助强度（1 秒一次）。多人中为服务器同步值，单机为存档沙盒值。 */
+    public static void refreshSandboxOptions() {
+        final long now = System.currentTimeMillis();
+        if (now - lastSandboxReadMs < SANDBOX_REFRESH_MS) {
+            return;
+        }
+        lastSandboxReadMs = now;
+        try {
+            final float v = getSandboxDouble("RelaxedAim", "AssistStrength", 0.5f);
+            assistStrengthSandbox = v < 0f ? 0f : (v > 1f ? 1f : v);
+        } catch (Throwable t) {
+        }
+    }
+
+    /** 从 Lua 全局表 SandboxVars.<page>.<id> 读取 double 沙盒选项。 */
+    public static float getSandboxDouble(String page, String id, float defaultValue) {
+        try {
+            final Object env = zombie.Lua.LuaManager.env;
+            if (env instanceof se.krka.kahlua.vm.KahluaTable) {
+                final Object sv = ((se.krka.kahlua.vm.KahluaTable) env).rawget("SandboxVars");
+                if (sv instanceof se.krka.kahlua.vm.KahluaTable) {
+                    final Object pg = ((se.krka.kahlua.vm.KahluaTable) sv).rawget(page);
+                    if (pg instanceof se.krka.kahlua.vm.KahluaTable) {
+                        final Object val = ((se.krka.kahlua.vm.KahluaTable) pg).rawget(id);
+                        if (val instanceof Number) {
+                            return ((Number) val).floatValue();
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+        }
+        return defaultValue;
     }
 
     private static float parseFloat(String s, float def) {

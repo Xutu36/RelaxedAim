@@ -18,6 +18,13 @@ zbSigning {
     jarTask = 'jar'
 }
 
+// 每次构建都重新签名，防止分发过期的 .zbs（签名必须与当前 JAR 匹配）
+tasks.configureEach { task ->
+    if (task.name == 'signJarZBS') {
+        task.outputs.upToDateWhen { false }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)

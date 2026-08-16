@@ -78,6 +78,10 @@ public final class AimAssistService {
             RelaxedAimConfig.refreshModOptions();
         } catch (Throwable t) {
         }
+        try {
+            RelaxedAimConfig.refreshSandboxOptions();
+        } catch (Throwable t) {
+        }
         checkHotkey();
     }
 

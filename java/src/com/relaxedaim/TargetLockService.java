@@ -204,7 +204,7 @@ public final class TargetLockService {
      */
     public static float computeSnapTimeMs(int pIndex) {
         try {
-            final float effect = Math.min(1f, Math.max(0f, RelaxedAimConfig.assistStrength
+            final float effect = Math.min(1f, Math.max(0f, RelaxedAimConfig.assistStrength()
                     * RelaxedAimConfig.snapStrengthScale));
             int aimLevel = 0;
             try {

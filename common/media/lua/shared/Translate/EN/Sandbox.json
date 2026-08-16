@@ -1,0 +1,5 @@
+{
+    "Sandbox_RelaxedAim": "RelaxedAim (Server Balance)",
+    "Sandbox_RelaxedAim_AssistStrength": "Assist strength",
+    "Sandbox_RelaxedAim_AssistStrength_tooltip": "Together with the player's Aiming skill, determines how fast the crosshair smoothly moves from an acquired lock to the zombie's head. Higher = faster snap. Server-side balance: in multiplayer all players use the server's value."
+}
