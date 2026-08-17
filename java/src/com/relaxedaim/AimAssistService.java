@@ -206,19 +206,24 @@ public final class AimAssistService {
 
     public static int playerIndex = -1;
 
+    /** 上一帧热键是否按下（上升沿去抖，防止按住时每帧重复翻转）。 */
+    public static boolean toggleKeyPrevDown = false;
+
     /**
      * 临时启用/禁用热键（PZAPI keybind，玩家可在 模组设置 中自定义按键）：
-     * 翻转 hotkeyToggled（不写配置文件，避免被刷新覆盖），并通知 Lua 显示头顶提示。
+     * 直接翻转 optionLockOn 并写回 ModOptions.ini（与模组设置勾选框保持同步），并通知 Lua 显示头顶提示。
      */
     public static void checkHotkey() {
         try {
-            if (zombie.input.GameKeyboard.isKeyPressed(RelaxedAimConfig.optionToggleKey)) {
-                RelaxedAimConfig.hotkeyToggled = !RelaxedAimConfig.hotkeyToggled;
+            final boolean down = zombie.input.GameKeyboard.isKeyPressed(RelaxedAimConfig.optionToggleKey);
+            if (down && !toggleKeyPrevDown) {
+                RelaxedAimConfig.setLockOn(!RelaxedAimConfig.optionLockOn);
                 TargetLockService.clearLock("toggle");
                 System.out.println("[RelaxedAim] Hotkey toggle -> effective LockOn="
                         + RelaxedAimConfig.isLockOnEffective());
                 writeToggleNotify();
             }
+            toggleKeyPrevDown = down;
         } catch (Throwable t) {
         }
     }

@@ -1,9 +1,14 @@
 package com.relaxedaim;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 配置中心。
@@ -16,20 +21,61 @@ import java.io.InputStreamReader;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v2.8";
-    public static final String VERSION_NOTES = "平衡定稿(snapMaxMs=1500); 移除全部临时调参配置项; 辅助强度仅取沙盒/服务器值";
+    public static final String VERSION = "Lock-v2.9";
+    public static final String VERSION_NOTES = "开关单一来源(热键/模组设置同步); 失锁瞬间回准心、重吸不跳变";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
-    /** 启用丧尸自动锁定（基础值，来自模组设置）。默认 true。 */
+    /** 启用丧尸自动锁定（唯一来源：模组设置勾选框与热键共用此值，二者始终同步）。默认 true。 */
     public static boolean optionLockOn = true;
 
-    /** 热键翻转标志：临时启用/禁用（不写入配置文件，避免被配置刷新覆盖）。 */
-    public static boolean hotkeyToggled = false;
-
-    /** 实际是否启用辅助 = 基础值 XOR 热键翻转。 */
+    /** 实际是否启用辅助 = 模组设置/热键的当前值（单一来源，无独立翻转标志）。 */
     public static boolean isLockOnEffective() {
-        return optionLockOn != hotkeyToggled;
+        return optionLockOn;
+    }
+
+    /** 设置开关并写回 ModOptions.ini（供热键与模组设置勾选框保持一致）。 */
+    public static void setLockOn(boolean on) {
+        optionLockOn = on;
+        writeModOption("lockOn", on ? "true" : "false");
+    }
+
+    /** 覆写 ModOptions.ini 中某条 RelaxedAim 设置（保留其余行），供热键同步菜单显示。 */
+    public static void writeModOption(String id, String value) {
+        try {
+            final File f = getModOptionsFile();
+            if (f == null || !f.exists()) {
+                return;
+            }
+            final List<String> lines = new ArrayList<>();
+            boolean found = false;
+            final BufferedReader br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(f), "UTF-8"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                final String[] t = line.split("\\|");
+                if (t.length >= 4 && "RelaxedAim".equals(t[1]) && id.equals(t[2])) {
+                    lines.add("tickbox|RelaxedAim|" + id + "|" + value);
+                    found = true;
+                } else {
+                    lines.add(line);
+                }
+            }
+            br.close();
+            if (!found) {
+                lines.add("tickbox|RelaxedAim|" + id + "|" + value);
+            }
+            final BufferedWriter bw = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(f), "UTF-8"));
+            for (int i = 0; i < lines.size(); i++) {
+                bw.write(lines.get(i));
+                if (i < lines.size() - 1) {
+                    bw.newLine();
+                }
+            }
+            bw.close();
+        } catch (Throwable t) {
+        }
     }
 
     /** 装备霰弹枪瞄准时取消辅助锁定。默认 true。 */

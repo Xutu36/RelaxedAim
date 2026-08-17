@@ -323,6 +323,7 @@ public final class TargetLockService {
     public static int overrideReticleY(int pIndex) {
         try {
             if (!isLockAimingActive(pIndex)) {
+                smoothInit = false;
                 return Integer.MIN_VALUE;
             }
             updateLockedSmooth(pIndex);
@@ -419,13 +420,14 @@ public final class TargetLockService {
     /** 锁定暂时失效的起始时间（毫秒），配合 optionLockHoldTimeMs 使用。 */
     public static long invalidSinceMs = 0L;
 
-    /** 清除锁定（未瞄准 / 未持枪时调用）。 */
+    /** 清除锁定（未瞄准 / 未持枪时调用）。完全释放：下次平滑从鼠标重新开始。 */
     public static void clearLock(String reason) {
         if (lockedTarget != null) {
             releaseLock(reason);
         }
         lockedTarget = null;
         invalidSinceMs = 0L;
+        smoothInit = false;
     }
 
     /** 锁定有效性校验（每帧对锁定目标做一次，开销极小）。失败时把原因写入 pendingReleaseReason。 */
@@ -513,9 +515,9 @@ public final class TargetLockService {
             lockedTarget = best;
             lockWorldDist = bestWorldDist;
             lockScreenDist = bestScreenDist;
-            // 新目标：重置强锁定，重新平滑吸附
+            // 新目标：重置强锁定；重置平滑时间窗（保留当前准心位置作为起点，避免跳变）
             strongLock = false;
-            smoothInit = false;
+            snapStartMs = System.currentTimeMillis();
             System.out.println("[RelaxedAim] LOCK acquired: zombieId=" + safeId(best)
                     + " worldDist=" + String.format("%.2f", lockWorldDist)
                     + " screenDist=" + String.format("%.1f", lockScreenDist));
@@ -544,7 +546,8 @@ public final class TargetLockService {
         debugReleaseTimeMs = System.currentTimeMillis();
         lockedTarget = null;
         strongLock = false;
-        smoothInit = false;
+        // 不重置 smoothInit：若紧随其后立即重吸，则从当前准心位置继续平滑，避免跳变；
+        // 真正释放（无重吸）时由 overrideReticleX 的未激活分支把 smoothInit 置 false。
     }
 
     public static int safeId(IsoZombie z) {
