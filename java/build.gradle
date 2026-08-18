@@ -64,11 +64,17 @@ tasks.named('build') {
 
 tasks.register('deployLocalMod', Sync) {
     dependsOn tasks.named('installMod')
+    dependsOn tasks.named('signJarZBS')
     into file('C:/Users/Administrator/Zomboid/mods/RelaxedAim')
     from(file('../common')) {
         into 'common'
     }
     from(file('../42')) {
         into '42'
+    }
+    // 同步时带上签名产物（否则 Sync 会删除目标目录里手工放置的 .zbs）
+    from(file('build/libs/RelaxedAim.jar.zbs')) {
+        into '42/media/java/client'
+        rename { 'RelaxedAim.jar.zbs' }
     }
 }

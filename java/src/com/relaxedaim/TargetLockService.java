@@ -120,24 +120,80 @@ public final class TargetLockService {
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
-    // ========== 原始鼠标世界瞄准点（锁定簿记用，不受 reticle 覆盖影响） ==========
+    // ========== 输入瞄准点（锁定簿记用，不受 reticle 覆盖影响） ==========
 
     /**
      * 锁定生效期间 reticle 被覆盖为锁定丧尸头部，导致 aimWorld 恒指向锁定目标，
-     * 释放/重筛判定必须用「原始鼠标」算出的世界瞄准点，否则移动鼠标永远无法释放锁定。
+     * 释放/重筛判定必须用「输入瞄准点」算出的世界瞄准点，否则移动输入永远无法释放锁定。
+     * 输入瞄准点 = 鼠标位置（鼠标）或 AimingReticle.aimingPositions（手柄摇杆），
+     * 二者与 Mouse.getXA/YA 同一「原始像素」空间（× zoom → XToIso 与世界一致）。
      */
     public static float rawAimWorldX = 0.0f;
     public static float rawAimWorldY = 0.0f;
     public static float rawAimWorldZ = 0.0f;
     public static boolean rawAimWorldValid = false;
 
-    /** 用原始鼠标（Mouse.getXA/YA × zoom → XToIso）计算世界瞄准点。 */
+    /** 手柄准星位置（AimingReticle.aimingPositions，private static，反射访问并缓存）。 */
+    public static java.lang.reflect.Field aimingPositionsField = null;
+    static {
+        try {
+            aimingPositionsField = zombie.input.AimingReticle.class.getDeclaredField("aimingPositions");
+            aimingPositionsField.setAccessible(true);
+        } catch (Throwable t) {
+            aimingPositionsField = null;
+        }
+    }
+
+    /** 当前输入瞄准位置（原始像素空间，与 Mouse.getXA 同一基准）。 */
+    public static int inputAimXA = 0;
+    public static int inputAimYA = 0;
+    public static boolean inputAimValid = false;
+
+    /** 玩家是否处于手柄输入模式。 */
+    public static boolean isGamepadInput(int pIndex) {
+        try {
+            final zombie.characters.IsoPlayer p = zombie.characters.IsoPlayer.getPlayer(pIndex);
+            return p != null && p.getInputMode() == zombie.characters.CharacterInputMode.GAMEPAD;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /** 每帧刷新输入瞄准位置：手柄读取摇杆准星，鼠标读取 Mouse.getXA/YA。 */
+    public static void updateInputAim(int pIndex) {
+        inputAimValid = false;
+        try {
+            if (isGamepadInput(pIndex)) {
+                if (aimingPositionsField != null) {
+                    final zombie.iso.Vector2[] pos = (zombie.iso.Vector2[]) aimingPositionsField.get(null);
+                    if (pos != null && pIndex >= 0 && pIndex < pos.length && pos[pIndex] != null) {
+                        inputAimXA = (int) pos[pIndex].x;
+                        inputAimYA = (int) pos[pIndex].y;
+                        inputAimValid = true;
+                    }
+                }
+            } else {
+                inputAimXA = zombie.input.Mouse.getXA();
+                inputAimYA = zombie.input.Mouse.getYA();
+                inputAimValid = true;
+            }
+        } catch (Throwable t) {
+        }
+        if (!inputAimValid) {
+            inputAimXA = zombie.input.Mouse.getXA();
+            inputAimYA = zombie.input.Mouse.getYA();
+            inputAimValid = true;
+        }
+    }
+
+    /** 用输入瞄准点（鼠标或手柄准星 × zoom → XToIso）计算世界瞄准点。 */
     public static void updateRawAimWorld(IsoPlayer player, int pIndex) {
         rawAimWorldValid = false;
         try {
+            updateInputAim(pIndex);
             final float zoom = getZoom(pIndex);
-            final float rx = zombie.input.Mouse.getXA() * zoom;
-            final float ry = zombie.input.Mouse.getYA() * zoom;
+            final float rx = inputAimXA * zoom;
+            final float ry = inputAimYA * zoom;
             final float z = player.getAimOriginPosZ();
             rawAimWorldX = IsoUtils.XToIso(pIndex, rx, ry, z);
             rawAimWorldY = IsoUtils.YToIso(pIndex, rx, ry, z);
@@ -249,8 +305,8 @@ public final class TargetLockService {
             final long now = System.currentTimeMillis();
             if (!smoothInit) {
                 smoothInit = true;
-                smoothX = zombie.input.Mouse.getXA();
-                smoothY = zombie.input.Mouse.getYA();
+                smoothX = inputAimXA;
+                smoothY = inputAimYA;
                 snapStartMs = now;
             }
             final float snapMs = computeSnapTimeMs(pIndex);

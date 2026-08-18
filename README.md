@@ -25,6 +25,7 @@ A **gun-assist auto-aim mod**. Vanilla pistols/rifles only deal high damage on p
 - **原版机制保留**：命中率、散布、缩圈、射程/遮挡/楼层限制完全走原版，仅移动弹道中心。
 - **临时开关**：默认键盘顶部数字行 `0` 键随时启用/禁用辅助（模组设置中可自定义按键，角色头顶显示提示）。
 - **清晰 UI**：青色捕获范围圈（锁定后渐阔到释放半径）、紫色圈标记将被/正在锁定的头部。
+- **手柄支持**：手柄瞄准（右摇杆）同样支持自动锁定与平滑吸附，手柄十字键上（模组设置可自定义手柄热键）随时开关辅助。
 - **配置本地化**：配置项随系统语言显示（EN / 简体中文 / 繁体中文）。
 
 - **Auto lock-on**: locks the nearest valid zombie near your aim point (configurable capture radius & max distance).
@@ -33,6 +34,7 @@ A **gun-assist auto-aim mod**. Vanilla pistols/rifles only deal high damage on p
 - **Vanilla preserved**: hit chance, spread, reticle contraction, range/line-of-sight/floor limits all stay vanilla — we only move the ballistic center to the head.
 - **Quick toggle**: default `0` key (top row), remappable in mod settings (overhead text notification).
 - **Clear UI**: a cyan capture-range circle (expands to the release radius when locked) and a purple marker on the target's head.
+- **Gamepad support**: works with controller aiming (right stick) — auto lock-on & smooth snapping; toggle with D-pad Up (remappable in mod settings).
 - **Localized**: settings follow the system language (EN / Simplified / Traditional Chinese).
 
 ---
@@ -122,9 +124,15 @@ RelaxedAim/
 
 ## ZombieBuddy 签名 / Signing
 
+<<<<<<< HEAD
 本项目的作者公钥已合入 ZombieBuddy 的 `authors.json`（GitHub PR，由 Zed 签名缓存），每次构建都会为 `RelaxedAim.jar` 生成匹配的 `.zbs` 签名（Ed25519）。玩家安装后由 ZombieBuddy 校验：先从 `authors.json` 取公钥，若列表未刷新则回退读取作者 Steam 个人资料简介中的 `JavaModZBS:<公钥>`。公钥：`a140d928eed497c39427d85fb849a202e883146cca5dbfd3c8949796e1f7146a`。详见 [ZombieBuddy ModSigning](https://github.com/zed-0xff/ZombieBuddy/blob/master/doc/ModSigning.md)。
 
 The author's public key has been merged into ZombieBuddy's `authors.json` (via a GitHub PR, signed & cached by Zed). Every build produces a matching `.zbs` Ed25519 signature for `RelaxedAim.jar`. ZombieBuddy verifies from `authors.json` first; if the list is stale it falls back to the `JavaModZBS:<pubkey>` string in the author's Steam profile summary. Public key: `a140d928eed497c39427d85fb849a202e883146cca5dbfd3c8949796e1f7146a`. See ZombieBuddy's ModSigning doc for details.
+=======
+本项目当前以**未签名**状态发布（玩家在 ZombieBuddy 审批框按未签名确认即可）。签名（`.zbs`）需作者公钥进入 ZombieBuddy 的 `authors.json`（经 GitHub PR 合并、由 Zed 公钥签名缓存）后才能离线校验。详见 `doc/` 与 [ZombieBuddy ModSigning](https://github.com/zed-0xff/ZombieBuddy/blob/master/doc/ModSigning.md)。
+
+This project is currently published **unsigned** (players confirm it as unsigned in the ZombieBuddy approval dialog). Signing (`.zbs`) requires the author's public key to be added to ZombieBuddy's `authors.json` (via a GitHub PR; the list is signed by Zed and cached). See ZombieBuddy's ModSigning doc for details.
+>>>>>>> b84758bb4f6b7310ac1a97f06849bfb2d1b3cba5
 
 ---
 
@@ -137,3 +145,7 @@ The author's public key has been merged into ZombieBuddy's `authors.json` (via a
 - This project is open source; everyone is welcome to study, audit and co-develop.
 - MIT License (see `LICENSE`).
 - Credits: [ZombieBuddy](https://steamcommunity.com/sharedfiles/filedetails/?id=3619862853) — the Java mod framework.
+<<<<<<< HEAD
+=======
+
+>>>>>>> b84758bb4f6b7310ac1a97f06849bfb2d1b3cba5

@@ -3,7 +3,6 @@ package com.relaxedaim;
 import me.zed_0xff.zombie_buddy.Patch;
 import zombie.characters.IsoPlayer;
 import zombie.iso.IsoWorld;
-import zombie.input.Mouse;
 
 /**
  * Phase 2: hook the in-game UI render loop to collect aim state.
@@ -56,10 +55,12 @@ public final class Patch_IngameState {
 
         // 【安全检查5】确保玩家已完全加载（位置有效）
         final float playerX, playerY, playerZ;
+        final int playerIndex;
         try {
             playerX = player.getX();
             playerY = player.getY();
             playerZ = player.getZ();
+            playerIndex = player.getIndex();
 
             // 检查位置是否有效（不是NaN或无穷大）
             if (Float.isNaN(playerX) || Float.isNaN(playerY) || Float.isNaN(playerZ) ||
@@ -70,12 +71,13 @@ public final class Patch_IngameState {
             return;
         }
 
-        // 获取基础信息（鼠标位置、瞄准状态）
+        // 获取基础信息（输入瞄准点、瞄准状态）。鼠标=Mouse.getX/getY；手柄=摇杆准星×zoom（同一虚拟像素空间）
         final int mouseX, mouseY;
         final boolean isAiming;
         try {
-            mouseX = Mouse.getX();
-            mouseY = Mouse.getY();
+            TargetLockService.updateInputAim(playerIndex);
+            mouseX = (int) (TargetLockService.inputAimXA * TargetLockService.getZoom(playerIndex));
+            mouseY = (int) (TargetLockService.inputAimYA * TargetLockService.getZoom(playerIndex));
             isAiming = player.isAiming();
         } catch (Exception e) {
             return;

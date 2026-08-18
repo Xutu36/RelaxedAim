@@ -21,8 +21,8 @@ import java.util.List;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v2.9";
-    public static final String VERSION_NOTES = "开关单一来源(热键/模组设置同步); 失锁瞬间回准心、重吸不跳变";
+    public static final String VERSION = "Lock-v3.1";
+    public static final String VERSION_NOTES = "支持手柄操作(摇杆自动锁定/平滑吸附/UI); 手柄Y键开关; 开关单一来源; 失锁瞬间回准心";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
@@ -99,6 +99,9 @@ public final class RelaxedAimConfig {
     /** 临时启用/禁用热键键码（PZAPI keybind，默认顶部数字行 0 = 48）。 */
     public static int optionToggleKey = 48;
 
+    /** 手柄开关热键（1-based 索引，与 ModOptions 组合框顺序一致）。默认 1 = 十字键上。 */
+    public static int optionGamepadToggle = 1;
+
     // ---------- 平滑吸附公式参数（已定稿，非配置项） ----------
 
     /** 吸附时间上限（毫秒）。 */
@@ -159,6 +162,7 @@ public final class RelaxedAimConfig {
             float maxLockDistance = optionMaxLockDistance;
             int lockHoldTimeMs = optionLockHoldTimeMs;
             int toggleKey = optionToggleKey;
+            int gamepadToggle = optionGamepadToggle;
             final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String line;
             while ((line = br.readLine()) != null) {
@@ -178,6 +182,8 @@ public final class RelaxedAimConfig {
                         lockHoldTimeMs = (int) parseFloat(val, optionLockHoldTimeMs);
                     } else if ("toggleKey".equals(id)) {
                         toggleKey = (int) parseFloat(val, optionToggleKey);
+                    } else if ("gamepadToggle".equals(id)) {
+                        gamepadToggle = (int) parseFloat(val, optionGamepadToggle);
                     }
                 }
             }
@@ -188,6 +194,7 @@ public final class RelaxedAimConfig {
             optionMaxLockDistance = maxLockDistance;
             optionLockHoldTimeMs = lockHoldTimeMs;
             optionToggleKey = toggleKey;
+            optionGamepadToggle = gamepadToggle;
             optionsReadFailed = false;
         } catch (Throwable t) {
             optionsReadFailed = true;
