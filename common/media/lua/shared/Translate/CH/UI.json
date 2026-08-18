@@ -16,20 +16,6 @@
     "UI_RelaxedAim_LockHoldTimeMs_desc": "锁定目标短暂失效（如被遮挡）时，锁定保留该时长后再释放；0 表示立即释放。",
     "UI_RelaxedAim_ShotgunNoLock": "裝備霰彈槍瞄準時取消輔助鎖定",
     "UI_RelaxedAim_ShotgunNoLock_desc": "開啟後，使用霰彈槍瞄準（常用於大面積殺傷）時不進行輔助鎖定。",
-    "UI_RelaxedAim_GamepadToggle": "手把熱鍵（開關輔助）",
-    "UI_RelaxedAim_GamepadToggle_desc": "選擇手把按鍵，隨時切換輔助瞄準開關。預設十字鍵上。",
-    "UI_RelaxedAim_PadBtn_DPadUp": "十字鍵上",
-    "UI_RelaxedAim_PadBtn_DPadDown": "十字鍵下",
-    "UI_RelaxedAim_PadBtn_DPadLeft": "十字鍵左",
-    "UI_RelaxedAim_PadBtn_DPadRight": "十字鍵右",
-    "UI_RelaxedAim_PadBtn_A": "A 鍵",
-    "UI_RelaxedAim_PadBtn_B": "B 鍵",
-    "UI_RelaxedAim_PadBtn_X": "X 鍵",
-    "UI_RelaxedAim_PadBtn_Y": "Y 鍵",
-    "UI_RelaxedAim_PadBtn_LB": "LB（左肩鍵）",
-    "UI_RelaxedAim_PadBtn_RB": "RB（右肩鍵）",
-    "UI_RelaxedAim_PadBtn_L3": "L3（左搖桿按下）",
-    "UI_RelaxedAim_PadBtn_R3": "R3（右搖桿按下）",
-    "UI_RelaxedAim_PadBtn_Back": "Back（選擇鍵）",
-    "UI_RelaxedAim_PadBtn_Start": "Start（開始鍵）"
+    "UI_RelaxedAim_GamepadSensitivity": "手把瞄準靈敏度",
+    "UI_RelaxedAim_GamepadSensitivity_desc": "影響右搖桿瞄準時準心/捕捉圈的移動速度（僅手把生效，不影響滑鼠）。數值越大移動越快。"
 }

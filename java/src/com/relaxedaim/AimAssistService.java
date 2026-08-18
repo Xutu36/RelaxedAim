@@ -209,57 +209,22 @@ public final class AimAssistService {
     /** 上一帧键盘热键是否按下（上升沿去抖，防止按住时每帧重复翻转）。 */
     public static boolean toggleKeyPrevDown = false;
 
-    /** 上一帧手柄热键是否按下（上升沿去抖；JoypadManager 只有电平态，需要自己判边沿）。 */
-    public static boolean gamepadTogglePrevDown = false;
-
     /**
-     * 临时启用/禁用热键：键盘（PZAPI keybind，可在 模组设置 中自定义）+ 手柄（组合框可选按键，默认十字键上）。
+     * 临时启用/禁用热键（键盘，PZAPI keybind，可在 模组设置 中自定义）：
      * 直接翻转 optionLockOn 并写回 ModOptions.ini（与模组设置勾选框保持同步），并通知 Lua 显示头顶提示。
      */
     public static void checkHotkey() {
         try {
             final boolean kbDown = zombie.input.GameKeyboard.isKeyPressed(RelaxedAimConfig.optionToggleKey);
-            boolean padDown = false;
-            try {
-                padDown = isGamepadToggleDown();
-            } catch (Throwable t) {
-            }
-            if ((kbDown && !toggleKeyPrevDown) || (padDown && !gamepadTogglePrevDown)) {
+            if (kbDown && !toggleKeyPrevDown) {
                 RelaxedAimConfig.setLockOn(!RelaxedAimConfig.optionLockOn);
                 TargetLockService.clearLock("toggle");
-                System.out.println("[RelaxedAim] Toggle (keyboard=" + kbDown + ", gamepad=" + padDown
+                System.out.println("[RelaxedAim] Toggle (keyboard=" + kbDown
                         + ") -> effective LockOn=" + RelaxedAimConfig.isLockOnEffective());
                 writeToggleNotify();
             }
             toggleKeyPrevDown = kbDown;
-            gamepadTogglePrevDown = padDown;
         } catch (Throwable t) {
-        }
-    }
-
-    /** 读取当前手柄热键（optionGamepadToggle 1-based）的电平状态。 */
-    public static boolean isGamepadToggleDown() {
-        final zombie.input.JoypadManager jm = zombie.input.JoypadManager.instance;
-        if (jm == null) {
-            return false;
-        }
-        final int pi = getPlayerIndex();
-        switch (RelaxedAimConfig.optionGamepadToggle) {
-            case 1: return jm.isUpPressed(pi);      // D-pad Up
-            case 2: return jm.isDownPressed(pi);    // D-pad Down
-            case 3: return jm.isLeftPressed(pi);    // D-pad Left
-            case 4: return jm.isRightPressed(pi);   // D-pad Right
-            case 5: return jm.isAPressed(pi);
-            case 6: return jm.isBPressed(pi);
-            case 7: return jm.isXPressed(pi);
-            case 8: return jm.isYPressed(pi);
-            case 9: return jm.isLBPressed(pi);
-            case 10: return jm.isRBPressed(pi);
-            case 11: return jm.isL3Pressed(pi);
-            case 12: return jm.isR3Pressed(pi);
-            case 13: return jm.isBackPressed(pi);
-            case 14: return jm.isStartPressed(pi);
-            default: return false;
         }
     }
 

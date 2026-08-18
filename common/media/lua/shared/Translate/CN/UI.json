@@ -16,20 +16,6 @@
     "UI_RelaxedAim_LockHoldTimeMs_desc": "锁定目标短暂失效（如被遮挡）时，锁定保留该时长后再释放；0 表示立即释放。",
     "UI_RelaxedAim_ShotgunNoLock": "装备霰弹枪瞄准时取消辅助锁定",
     "UI_RelaxedAim_ShotgunNoLock_desc": "开启后，使用霰弹枪瞄准（常用于大面积杀伤）时不进行辅助锁定。",
-    "UI_RelaxedAim_GamepadToggle": "手柄热键（开关辅助）",
-    "UI_RelaxedAim_GamepadToggle_desc": "选择手柄按键，随时切换辅助瞄准开关。默认十字键上。",
-    "UI_RelaxedAim_PadBtn_DPadUp": "十字键上",
-    "UI_RelaxedAim_PadBtn_DPadDown": "十字键下",
-    "UI_RelaxedAim_PadBtn_DPadLeft": "十字键左",
-    "UI_RelaxedAim_PadBtn_DPadRight": "十字键右",
-    "UI_RelaxedAim_PadBtn_A": "A 键",
-    "UI_RelaxedAim_PadBtn_B": "B 键",
-    "UI_RelaxedAim_PadBtn_X": "X 键",
-    "UI_RelaxedAim_PadBtn_Y": "Y 键",
-    "UI_RelaxedAim_PadBtn_LB": "LB（左肩键）",
-    "UI_RelaxedAim_PadBtn_RB": "RB（右肩键）",
-    "UI_RelaxedAim_PadBtn_L3": "L3（左摇杆按下）",
-    "UI_RelaxedAim_PadBtn_R3": "R3（右摇杆按下）",
-    "UI_RelaxedAim_PadBtn_Back": "Back（选择键）",
-    "UI_RelaxedAim_PadBtn_Start": "Start（开始键）"
+    "UI_RelaxedAim_GamepadSensitivity": "手柄瞄准灵敏度",
+    "UI_RelaxedAim_GamepadSensitivity_desc": "影响右摇杆瞄准时准心/捕捉圈的移动速度（仅手柄生效，不影响鼠标）。数值越大移动越快。"
 }

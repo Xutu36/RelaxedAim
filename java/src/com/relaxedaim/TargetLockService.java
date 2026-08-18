@@ -190,6 +190,7 @@ public final class TargetLockService {
     public static void updateRawAimWorld(IsoPlayer player, int pIndex) {
         rawAimWorldValid = false;
         try {
+            lockPlayerIndex = pIndex;
             updateInputAim(pIndex);
             final float zoom = getZoom(pIndex);
             final float rx = inputAimXA * zoom;
@@ -203,10 +204,50 @@ public final class TargetLockService {
         }
     }
 
+    /**
+     * 目标相关的投影高度：站立 = 胸口高度（getAimOriginPosZ），击倒/倒地 = 贴地高度（getZ）。
+     * 玩家的瞄准原点在胸口高度，瞄准射线在该高度投影的世界点与「站立丧尸胸口」对齐；
+     * 但倒地丧尸的躯体贴地，射线在地面高度才与其对齐——若仍按胸口高度投影，距离会被放大，
+     * 导致捕捉圈内的倒地丧尸捕捉不到。修复：按目标姿态选择投影高度。
+     */
+    public static float aimProjZ(IsoZombie z) {
+        try {
+            if (z.isKnockedDown() || z.isProne()) {
+                return z.getZ();
+            }
+            return z.getAimOriginPosZ();
+        } catch (Exception e) {
+            try {
+                return z.getZ();
+            } catch (Exception e2) {
+                return rawAimWorldZ;
+            }
+        }
+    }
+
+    /** 输入瞄准点在指定高度投影的世界坐标 X。 */
+    public static float inputAimWorldXAt(float projZ, int pIndex) {
+        return IsoUtils.XToIso(pIndex, inputAimXA * getZoom(pIndex), inputAimYA * getZoom(pIndex), projZ);
+    }
+
+    public static float inputAimWorldYAt(float projZ, int pIndex) {
+        return IsoUtils.YToIso(pIndex, inputAimXA * getZoom(pIndex), inputAimYA * getZoom(pIndex), projZ);
+    }
+
+    /** 输入瞄准点 → 目标距离：按目标姿态的投影高度计算，倒地丧尸才能被捕捉/正确释放。 */
     public static float rawAimWorldDistTo(IsoZombie z) {
-        final float dx = z.getX() - rawAimWorldX;
-        final float dy = z.getY() - rawAimWorldY;
-        return (float) Math.sqrt(dx * dx + dy * dy);
+        try {
+            final float projZ = aimProjZ(z);
+            final float ax = inputAimWorldXAt(projZ, lockPlayerIndex);
+            final float ay = inputAimWorldYAt(projZ, lockPlayerIndex);
+            final float dx = z.getX() - ax;
+            final float dy = z.getY() - ay;
+            return (float) Math.sqrt(dx * dx + dy * dy);
+        } catch (Exception e) {
+            final float dx = z.getX() - rawAimWorldX;
+            final float dy = z.getY() - rawAimWorldY;
+            return (float) Math.sqrt(dx * dx + dy * dy);
+        }
     }
 
     // ========== 锁定核心：覆盖 AimingReticle 使准星/弹道对准锁定丧尸头部 ==========
@@ -403,13 +444,13 @@ public final class TargetLockService {
         return mouseY * getZoom(pIndex);
     }
 
-    /** 丧尸瞄准点在「虚拟空间」的坐标 = XToScreenExact（不含 offX/zoom/fix，与准星换算同一基准）。 */
+    /** 丧尸瞄准点在「虚拟空间」的坐标 = XToScreenExact（不含 offX/zoom/fix，与准星换算同一基准；按姿态投影高度）。 */
     public static float aimVirtualX(IsoZombie z, int pIndex) {
-        return IsoUtils.XToScreenExact(z.getX(), z.getY(), z.getAimOriginPosZ(), pIndex);
+        return IsoUtils.XToScreenExact(z.getX(), z.getY(), aimProjZ(z), pIndex);
     }
 
     public static float aimVirtualY(IsoZombie z, int pIndex) {
-        return IsoUtils.YToScreenExact(z.getX(), z.getY(), z.getAimOriginPosZ(), pIndex);
+        return IsoUtils.YToScreenExact(z.getX(), z.getY(), aimProjZ(z), pIndex);
     }
 
     /**

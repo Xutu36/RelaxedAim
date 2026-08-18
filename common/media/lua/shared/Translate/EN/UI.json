@@ -16,20 +16,6 @@
     "UI_RelaxedAim_LockHoldTimeMs_desc": "When a locked zombie briefly becomes invalid (occluded), keep the lock for this many milliseconds before releasing. 0 = release immediately.",
     "UI_RelaxedAim_ShotgunNoLock": "Disable lock-on while aiming a shotgun",
     "UI_RelaxedAim_ShotgunNoLock_desc": "When ON, aiming with a shotgun (typically used for area damage) disables the aim lock-on.",
-    "UI_RelaxedAim_GamepadToggle": "Gamepad toggle (assist on/off)",
-    "UI_RelaxedAim_GamepadToggle_desc": "Select a gamepad button to toggle aim assist on/off. Default: D-pad Up.",
-    "UI_RelaxedAim_PadBtn_DPadUp": "D-pad Up",
-    "UI_RelaxedAim_PadBtn_DPadDown": "D-pad Down",
-    "UI_RelaxedAim_PadBtn_DPadLeft": "D-pad Left",
-    "UI_RelaxedAim_PadBtn_DPadRight": "D-pad Right",
-    "UI_RelaxedAim_PadBtn_A": "A Button",
-    "UI_RelaxedAim_PadBtn_B": "B Button",
-    "UI_RelaxedAim_PadBtn_X": "X Button",
-    "UI_RelaxedAim_PadBtn_Y": "Y Button",
-    "UI_RelaxedAim_PadBtn_LB": "LB (Left Bumper)",
-    "UI_RelaxedAim_PadBtn_RB": "RB (Right Bumper)",
-    "UI_RelaxedAim_PadBtn_L3": "L3 (Left Stick Click)",
-    "UI_RelaxedAim_PadBtn_R3": "R3 (Right Stick Click)",
-    "UI_RelaxedAim_PadBtn_Back": "Back (Select)",
-    "UI_RelaxedAim_PadBtn_Start": "Start"
+    "UI_RelaxedAim_GamepadSensitivity": "Gamepad aim sensitivity",
+    "UI_RelaxedAim_GamepadSensitivity_desc": "Affects the movement speed of the crosshair/capture circle when aiming with the right stick (gamepad only; mouse unaffected). Higher = faster."
 }
