@@ -316,10 +316,10 @@ public final class AimAssistService {
         if (maxRange <= 0.0f || maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
             maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
         }
-        // 最大锁定距离：与武器射程取较小值
-        final float lockMax = RelaxedAimConfig.optionMaxLockDistance;
-        if (lockMax > 0f && lockMax < maxRange) {
-            maxRange = lockMax;
+        // 最大锁定距离 = 枪械射程 + 枪械射程额外锁定距离（米）
+        maxRange += RelaxedAimConfig.optionMaxLockDistance;
+        if (maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
+            maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
         }
 
         final float lockRadius = TargetLockService.effectiveLockRadiusPx(playerIndex);

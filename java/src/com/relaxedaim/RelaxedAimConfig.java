@@ -21,8 +21,8 @@ import java.util.List;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v3.3";
-    public static final String VERSION_NOTES = "移除手柄开关热键; 新增手柄瞄准灵敏度(影响右摇杆准心/捕捉圈移动速度,仅手柄生效); 修复倒地丧尸捕捉";
+    public static final String VERSION = "Lock-v3.4";
+    public static final String VERSION_NOTES = "最大锁定距离改为「枪械射程额外锁定距离」(0-20米,默认5): 最大锁定距离=枪械射程+额外距离; 中英文名与描述同步更新";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
@@ -90,8 +90,8 @@ public final class RelaxedAimConfig {
     /** 锁定捕获半径（世界瓦片）。默认 1.5。 */
     public static float optionLockRadiusWorld = 1.5f;
 
-    /** 最大锁定距离（世界瓦片）。默认 25。 */
-    public static float optionMaxLockDistance = 25.0f;
+    /** 枪械射程额外锁定距离（米，在枪械射程基础上累加为最大锁定距离）。默认 5。 */
+    public static float optionMaxLockDistance = 5.0f;
 
     /** 锁定保持时间（毫秒）。默认 500。 */
     public static int optionLockHoldTimeMs = 500;
@@ -177,7 +177,7 @@ public final class RelaxedAimConfig {
                     } else if ("lockRadius".equals(id)) {
                         lockRadiusWorld = parseFloat(val, optionLockRadiusWorld);
                     } else if ("maxLockDistance".equals(id)) {
-                        maxLockDistance = parseFloat(val, optionMaxLockDistance);
+                        maxLockDistance = clampF(parseFloat(val, optionMaxLockDistance), 0f, 20f);
                     } else if ("lockHoldTimeMs".equals(id)) {
                         lockHoldTimeMs = (int) parseFloat(val, optionLockHoldTimeMs);
                     } else if ("toggleKey".equals(id)) {
@@ -247,6 +247,10 @@ public final class RelaxedAimConfig {
         } catch (Throwable t) {
             return def;
         }
+    }
+
+    private static float clampF(float v, float min, float max) {
+        return v < min ? min : (v > max ? max : v);
     }
 
     private static float clamp01(float v) {

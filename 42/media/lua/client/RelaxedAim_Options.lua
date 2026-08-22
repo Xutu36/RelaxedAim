@@ -21,7 +21,7 @@ options:addDescription("UI_RelaxedAim_GamepadSensitivity_desc")
 config.lockRadius = options:addSlider("lockRadius", "UI_RelaxedAim_LockRadius", 0.5, 2.0, 0.1, 1.5, "UI_RelaxedAim_LockRadius_desc")
 options:addDescription("UI_RelaxedAim_LockRadius_desc")
 
-config.maxLockDistance = options:addSlider("maxLockDistance", "UI_RelaxedAim_MaxLockDistance", 20, 100, 1, 25, "UI_RelaxedAim_MaxLockDistance_desc")
+config.maxLockDistance = options:addSlider("maxLockDistance", "UI_RelaxedAim_MaxLockDistance", 0, 20, 1, 5, "UI_RelaxedAim_MaxLockDistance_desc")
 options:addDescription("UI_RelaxedAim_MaxLockDistance_desc")
 
 config.lockHoldTimeMs = options:addSlider("lockHoldTimeMs", "UI_RelaxedAim_LockHoldTimeMs", 0, 3000, 100, 500, "UI_RelaxedAim_LockHoldTimeMs_desc")
