@@ -21,6 +21,14 @@ options:addDescription("UI_RelaxedAim_GamepadSensitivity_desc")
 config.lockRadius = options:addSlider("lockRadius", "UI_RelaxedAim_LockRadius", 0.5, 2.0, 0.1, 1.5, "UI_RelaxedAim_LockRadius_desc")
 options:addDescription("UI_RelaxedAim_LockRadius_desc")
 
+-- 青色捕捉圈透明度（0-1）
+config.captureCircleAlpha = options:addSlider("captureCircleAlpha", "UI_RelaxedAim_CaptureCircleAlpha", 0.0, 1.0, 0.05, 0.6, "UI_RelaxedAim_CaptureCircleAlpha_desc")
+options:addDescription("UI_RelaxedAim_CaptureCircleAlpha_desc")
+
+-- 紫色头部锁定标识透明度（0-1）
+config.lockMarkerAlpha = options:addSlider("lockMarkerAlpha", "UI_RelaxedAim_LockMarkerAlpha", 0.0, 1.0, 0.05, 0.9, "UI_RelaxedAim_LockMarkerAlpha_desc")
+options:addDescription("UI_RelaxedAim_LockMarkerAlpha_desc")
+
 config.maxLockDistance = options:addSlider("maxLockDistance", "UI_RelaxedAim_MaxLockDistance", 0, 20, 1, 5, "UI_RelaxedAim_MaxLockDistance_desc")
 options:addDescription("UI_RelaxedAim_MaxLockDistance_desc")
 

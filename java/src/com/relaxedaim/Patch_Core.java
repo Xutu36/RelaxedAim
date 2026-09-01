@@ -287,7 +287,7 @@ public final class Patch_Core {
                 // 平滑过渡（渐阔/渐收）
                 uiRangeRadiusTiles += (targetTiles - uiRangeRadiusTiles) * 0.1f;
                 final float radius = uiRangeRadiusTiles * 32.0f * zombie.core.Core.tileScale / zoom;
-                drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, 0.6f * RelaxedAimConfig.optionHudAlpha, lw);
+                drawRing(sr, white, cx, cy, radius, 0.35f, 0.8f, 1.0f, RelaxedAimConfig.optionCaptureCircleAlpha * RelaxedAimConfig.optionHudAlpha, lw);
             } catch (Exception e) {
             }
         }
@@ -303,7 +303,7 @@ public final class Patch_Core {
                         TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
                 final float ny = TargetLockService.worldScreenY(TargetLockService.sHeadPos.x,
                         TargetLockService.sHeadPos.y, TargetLockService.sHeadPos.z, pIndex);
-                drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, 0.9f * RelaxedAimConfig.optionHudAlpha, lw);
+                drawRing(sr, white, nx, ny, 14.0f, 1.0f, 0.3f, 1.0f, RelaxedAimConfig.optionLockMarkerAlpha * RelaxedAimConfig.optionHudAlpha, lw);
             } catch (Exception e) {
             }
         }

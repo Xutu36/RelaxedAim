@@ -21,8 +21,8 @@ import java.util.List;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v3.4";
-    public static final String VERSION_NOTES = "最大锁定距离改为「枪械射程额外锁定距离」(0-20米,默认5): 最大锁定距离=枪械射程+额外距离; 中英文名与描述同步更新";
+    public static final String VERSION = "Lock-v3.5";
+    public static final String VERSION_NOTES = "修复: 锁定有效性校验仍用旧式最小距离公式导致额外距离>0时锁定震荡闪烁; 统一为共享公式 effectiveMaxLockRange(射程+额外); 新增青色捕捉圈/紫色锁定标识透明度滑块(0-1,默认0.6/0.9,中英文本地化)";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
@@ -93,6 +93,12 @@ public final class RelaxedAimConfig {
     /** 枪械射程额外锁定距离（米，在枪械射程基础上累加为最大锁定距离）。默认 5。 */
     public static float optionMaxLockDistance = 5.0f;
 
+    /** 青色捕捉圈透明度（0-1）。默认 0.6。 */
+    public static float optionCaptureCircleAlpha = 0.6f;
+
+    /** 紫色头部锁定标识透明度（0-1）。默认 0.9。 */
+    public static float optionLockMarkerAlpha = 0.9f;
+
     /** 锁定保持时间（毫秒）。默认 500。 */
     public static int optionLockHoldTimeMs = 500;
 
@@ -160,6 +166,8 @@ public final class RelaxedAimConfig {
             boolean shotgunNoLock = optionShotgunNoLock;
             float lockRadiusWorld = optionLockRadiusWorld;
             float maxLockDistance = optionMaxLockDistance;
+            float captureCircleAlpha = optionCaptureCircleAlpha;
+            float lockMarkerAlpha = optionLockMarkerAlpha;
             int lockHoldTimeMs = optionLockHoldTimeMs;
             int toggleKey = optionToggleKey;
             float gamepadSensitivity = optionGamepadSensitivity;
@@ -178,6 +186,10 @@ public final class RelaxedAimConfig {
                         lockRadiusWorld = parseFloat(val, optionLockRadiusWorld);
                     } else if ("maxLockDistance".equals(id)) {
                         maxLockDistance = clampF(parseFloat(val, optionMaxLockDistance), 0f, 20f);
+                    } else if ("captureCircleAlpha".equals(id)) {
+                        captureCircleAlpha = clamp01(parseFloat(val, optionCaptureCircleAlpha));
+                    } else if ("lockMarkerAlpha".equals(id)) {
+                        lockMarkerAlpha = clamp01(parseFloat(val, optionLockMarkerAlpha));
                     } else if ("lockHoldTimeMs".equals(id)) {
                         lockHoldTimeMs = (int) parseFloat(val, optionLockHoldTimeMs);
                     } else if ("toggleKey".equals(id)) {
@@ -192,6 +204,8 @@ public final class RelaxedAimConfig {
             optionShotgunNoLock = shotgunNoLock;
             optionLockRadiusWorld = lockRadiusWorld;
             optionMaxLockDistance = maxLockDistance;
+            optionCaptureCircleAlpha = captureCircleAlpha;
+            optionLockMarkerAlpha = lockMarkerAlpha;
             optionLockHoldTimeMs = lockHoldTimeMs;
             optionToggleKey = toggleKey;
             optionGamepadSensitivity = gamepadSensitivity;

@@ -283,6 +283,27 @@ public final class AimAssistService {
     }
 
     /**
+     * 最大锁定距离 = 枪械射程 + 枪械射程额外锁定距离（米），并受世界扫描上限约束。
+     * 候选筛选与锁定有效性校验共用此公式（避免两处逻辑分叉导致锁定震荡）。
+     */
+    public static float effectiveMaxLockRange(HandWeapon weapon) {
+        float r;
+        try {
+            r = weapon.getMaxRange();
+        } catch (Exception e) {
+            r = 0.0f;
+        }
+        if (r <= 0.0f || r > MAX_WORLD_SCAN_RADIUS_TILES) {
+            r = MAX_WORLD_SCAN_RADIUS_TILES;
+        }
+        r += RelaxedAimConfig.optionMaxLockDistance;
+        if (r > MAX_WORLD_SCAN_RADIUS_TILES) {
+            r = MAX_WORLD_SCAN_RADIUS_TILES;
+        }
+        return r;
+    }
+
+    /**
      * 单遍扫描：廉价过滤（存活/楼层/射程/可见性）后，仅收集「鼠标附近 lockRadiusPx 内」的丧尸。
      * 候选数量达到 maxCandidates 即停止（有限遍历）。
      * 投影统一使用 getAimOriginPosZ()（瞄准点/胸口高度），与锁定标记一致。
@@ -312,15 +333,7 @@ public final class AimAssistService {
             return candidates;
         }
 
-        float maxRange = weapon.getMaxRange();
-        if (maxRange <= 0.0f || maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
-            maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
-        }
-        // 最大锁定距离 = 枪械射程 + 枪械射程额外锁定距离（米）
-        maxRange += RelaxedAimConfig.optionMaxLockDistance;
-        if (maxRange > MAX_WORLD_SCAN_RADIUS_TILES) {
-            maxRange = MAX_WORLD_SCAN_RADIUS_TILES;
-        }
+        float maxRange = effectiveMaxLockRange(weapon);
 
         final float lockRadius = TargetLockService.effectiveLockRadiusPx(playerIndex);
         final float lockRadiusWorld = RelaxedAimConfig.optionLockRadiusWorld;

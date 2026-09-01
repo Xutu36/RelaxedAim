@@ -555,9 +555,8 @@ public final class TargetLockService {
                 return false;
             }
             final float worldDist = player.DistTo(z);
-            final float maxRange = weapon.getMaxRange();
-            final float lockMax = RelaxedAimConfig.optionMaxLockDistance;
-            if (worldDist > (lockMax > 0f && lockMax < maxRange ? lockMax : maxRange)) {
+            // 与候选筛选同一公式：最大锁定距离 = 枪械射程 + 额外锁定距离（米）
+            if (worldDist > AimAssistService.effectiveMaxLockRange(weapon)) {
                 pendingReleaseReason = "range";
                 return false;
             }
