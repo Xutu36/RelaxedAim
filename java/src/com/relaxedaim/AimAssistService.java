@@ -82,8 +82,26 @@ public final class AimAssistService {
             RelaxedAimConfig.refreshSandboxOptions();
         } catch (Throwable t) {
         }
+        // 【Spike】刷新 Viewpoint 3D 状态（供 Patch_CrosshairAimYaw 注入与 HUD 显示）
+        try {
+            ViewpointCompat.refresh();
+        } catch (Throwable t) {
+        }
+        // 【Viewpoint】3D 下驱动水平吸附（写系统属性 relaxedaim.aimYawDeg）；非 3D 时归零
+        try {
+            final IsoPlayer vpPlayer = IsoPlayer.getInstance();
+            if (ViewpointCompat.active && vpPlayer != null && vpPlayer.isAiming()) {
+                ViewpointAssist.update(vpPlayer, IsoPlayer.getPlayerIndex());
+            } else {
+                ViewpointAssist.idle();
+            }
+        } catch (Throwable t) {
+        }
         checkHotkey();
     }
+
+    /** 上一次写入系统属性的 spike 偏移（避免每帧重复设置）。 */
+    public static String lastSpikeProp = null;
 
     public static void updateAiming(IsoPlayer player, int mouseX, int mouseY,
                                      float playerX, float playerY, float playerZ) {

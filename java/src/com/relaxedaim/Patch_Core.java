@@ -79,6 +79,48 @@ public final class Patch_Core {
                         : String.format("%.1fs", agoMs / 1000.0);
                 draw(font, x, y, "LastLost: " + TargetLockService.debugReleaseReason + " (" + ago + " ago)", 0.9f, 0.6f, 0.4f, 1.0f);
             }
+            y += lineH;
+
+            // 【Spike】Viewpoint 3D 状态 + 武器瞄准解耦验证
+            try {
+                final IsoPlayer pl = IsoPlayer.getInstance();
+                final float aimLookDeg = (pl != null ? pl.getLookAngleRadians() : 0.0f) * 180.0f / (float) Math.PI;
+                final float facingDeg = (pl != null ? pl.getDirectionAngle() : 0.0f);
+                draw(font, x, y, "VP avail=" + ViewpointCompat.available + " active=" + ViewpointCompat.active
+                        + " cap=" + ViewpointCompat.captured + " 3rd=" + ViewpointCompat.thirdPerson
+                        + " free=" + ViewpointCompat.freeCam, 1.0f, 0.6f, 1.0f, 1.0f);
+                y += lineH;
+                if (!ViewpointCompat.available) {
+                    String st = ViewpointCompat.debugStatus != null ? ViewpointCompat.debugStatus : "?";
+                    if (st.length() > 120) {
+                        st = st.substring(0, 120);
+                    }
+                    draw(font, x, y, "VP status: " + st, 1.0f, 0.4f, 0.4f, 1.0f);
+                    y += lineH;
+                }
+                draw(font, x, y, String.format("VP camYaw=%.1f camPitch=%.1f | aimLook=%.1f facing=%.1f | spike=%.0f deg apply=%d",
+                        ViewpointCompat.lookYawDeg, ViewpointCompat.lookPitchDeg,
+                        aimLookDeg, facingDeg,
+                        RelaxedAimConfig.optionSpikeAimOffsetDeg, ViewpointCompat.spikeApplyCount),
+                        1.0f, 0.9f, 0.4f, 1.0f);
+                y += lineH;
+                if (ViewpointCompat.available) {
+                    draw(font, x, y, String.format("VP cross=(%.0f,%.0f) onTarget=%s shown=%s camUp=%.2f fovY=%.1f%s",
+                            ViewpointCompat.crosshairX, ViewpointCompat.crosshairY,
+                            ViewpointCompat.crosshairOnTarget, ViewpointCompat.crosshairShown,
+                            ViewpointCompat.cameraUp, ViewpointCompat.frameFovY,
+                            ViewpointCompat.debugMissing.isEmpty() ? "" : " miss=" + ViewpointCompat.debugMissing),
+                            0.8f, 1.0f, 0.9f, 1.0f);
+                    y += lineH;
+                    draw(font, x, y, String.format("VPA tgt=%d has=%s dist=%.1f raw=%+.1f assist=%+.1f %s",
+                            ViewpointAssist.targetId, ViewpointAssist.hasTarget, ViewpointAssist.targetDist,
+                            ViewpointAssist.rawYawDeg, ViewpointAssist.assistYawDeg,
+                            ViewpointAssist.debugReason),
+                            1.0f, 0.8f, 0.5f, 1.0f);
+                    y += lineH;
+                }
+            } catch (Throwable t) {
+            }
 
             // 右侧调试面板：实时打印鼠标与锁定目标的关键相对位置
             drawRightPanel();
@@ -236,6 +278,10 @@ public final class Patch_Core {
      *  - 紫色圈：画在将被/正在锁定丧尸的头部骨骼处。
      */
     public static void drawLockAssistUI() {
+        if (ViewpointCompat.active) {
+            // 3D（Viewpoint）下 iso 投影坐标无意义，禁用 iso 捕捉圈/标识（否则会残留上次俯视角位置）
+            return;
+        }
         if (!RelaxedAimConfig.isLockOnEffective()) {
             return;
         }

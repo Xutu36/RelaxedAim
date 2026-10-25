@@ -16,6 +16,8 @@
     "UI_RelaxedAim_CaptureCircleAlpha_desc": "瞄准点周围青色捕捉圈的透明度（0-1）。0 = 完全透明，1 = 完全不透明。",
     "UI_RelaxedAim_LockMarkerAlpha": "锁定标识透明度",
     "UI_RelaxedAim_LockMarkerAlpha_desc": "紫色头部锁定标识的透明度（0-1）。0 = 完全透明，1 = 完全不透明。",
+    "UI_RelaxedAim_SpikeAimOffset": "【测试】武器瞄准偏转（度）",
+    "UI_RelaxedAim_SpikeAimOffset_desc": "仅测试用。在不移动相机的前提下，把武器瞄准方向偏转这么多度（用于验证 Viewpoint 3D 适配）。0 = 关闭。",
     "UI_RelaxedAim_LockHoldTimeMs": "锁定保持时间（毫秒）",
     "UI_RelaxedAim_LockHoldTimeMs_desc": "锁定目标短暂失效（如被遮挡）时，锁定保留该时长后再释放；0 表示立即释放。",
     "UI_RelaxedAim_ShotgunNoLock": "装备霰弹枪瞄准时取消辅助锁定",

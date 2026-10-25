@@ -21,8 +21,8 @@ import java.util.List;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v3.5";
-    public static final String VERSION_NOTES = "修复: 锁定有效性校验仍用旧式最小距离公式导致额外距离>0时锁定震荡闪烁; 统一为共享公式 effectiveMaxLockRange(射程+额外); 新增青色捕捉圈/紫色锁定标识透明度滑块(0-1,默认0.6/0.9,中英文本地化)";
+    public static final String VERSION = "Lock-v4.5";
+    public static final String VERSION_NOTES = "修3D问题: 禁用3D下iso捕捉圈残留; Viewpoint锁定改近距优先(<=20m)+锥内+保持时间防抖; HUD加dist";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 
@@ -81,8 +81,11 @@ public final class RelaxedAimConfig {
     /** 装备霰弹枪瞄准时取消辅助锁定。默认 true。 */
     public static boolean optionShotgunNoLock = true;
 
-    /** 显示 OverlayHUD（调试信息与右侧面板）。发布时设 false。默认 true。 */
-    public static boolean optionShowHud = false;
+    /** 显示 OverlayHUD（调试信息与右侧面板）。发布时设 false。默认 true（Spike 测试期开启）。 */
+    public static boolean optionShowHud = true;
+
+    /** 【Spike】Viewpoint 武器瞄准 yaw 偏移（度）。0 = 关闭注入。用于验证「只偏转武器瞄准、不动相机」。 */
+    public static float optionSpikeAimOffsetDeg = 0.0f;
 
     /** OverlayHUD 透明度（0-1）。默认 1.0。 */
     public static float optionHudAlpha = 1.0f;
@@ -168,6 +171,7 @@ public final class RelaxedAimConfig {
             float maxLockDistance = optionMaxLockDistance;
             float captureCircleAlpha = optionCaptureCircleAlpha;
             float lockMarkerAlpha = optionLockMarkerAlpha;
+            float spikeAimOffsetDeg = optionSpikeAimOffsetDeg;
             int lockHoldTimeMs = optionLockHoldTimeMs;
             int toggleKey = optionToggleKey;
             float gamepadSensitivity = optionGamepadSensitivity;
@@ -190,6 +194,8 @@ public final class RelaxedAimConfig {
                         captureCircleAlpha = clamp01(parseFloat(val, optionCaptureCircleAlpha));
                     } else if ("lockMarkerAlpha".equals(id)) {
                         lockMarkerAlpha = clamp01(parseFloat(val, optionLockMarkerAlpha));
+                    } else if ("spikeAimOffset".equals(id)) {
+                        spikeAimOffsetDeg = clampF(parseFloat(val, optionSpikeAimOffsetDeg), -90f, 90f);
                     } else if ("lockHoldTimeMs".equals(id)) {
                         lockHoldTimeMs = (int) parseFloat(val, optionLockHoldTimeMs);
                     } else if ("toggleKey".equals(id)) {
@@ -206,6 +212,7 @@ public final class RelaxedAimConfig {
             optionMaxLockDistance = maxLockDistance;
             optionCaptureCircleAlpha = captureCircleAlpha;
             optionLockMarkerAlpha = lockMarkerAlpha;
+            optionSpikeAimOffsetDeg = spikeAimOffsetDeg;
             optionLockHoldTimeMs = lockHoldTimeMs;
             optionToggleKey = toggleKey;
             optionGamepadSensitivity = gamepadSensitivity;

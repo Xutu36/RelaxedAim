@@ -378,6 +378,10 @@ public final class TargetLockService {
      * 供 AimingReticle.getXA/getYA 覆盖判定使用。
      */
     public static boolean isLockAimingActive(int pIndex) {
+        // Viewpoint 3D 下由 ViewpointAssist 处理，禁用 iso 的准星(Reticle)覆写，避免与 Viewpoint 冲突
+        if (com.relaxedaim.ViewpointCompat.active) {
+            return false;
+        }
         if (!RelaxedAimConfig.isLockOnEffective() || lockedTarget == null) {
             return false;
         }

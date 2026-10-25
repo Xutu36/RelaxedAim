@@ -5,9 +5,9 @@ plugins {
     id 'io.github.zed-0xff.zb-gradle-plugin' version '1.0.0'
 }
 
-def gameDir = file('D:/steam/steamapps/common/ProjectZomboid')
+def gameDir = file('F:/SteamLibrary/steamapps/common/ProjectZomboid')
 def modDir = file('../42')
-def zombieBuddyJar = file('D:/steam/steamapps/workshop/content/108600/3619862853/mods/ZombieBuddy/libs/ZombieBuddy.jar')
+def zombieBuddyJar = file('F:/SteamLibrary/steamapps/workshop/content/108600/3619862853/mods/ZombieBuddy/libs/ZombieBuddy.jar')
 
 repositories {
     mavenCentral()

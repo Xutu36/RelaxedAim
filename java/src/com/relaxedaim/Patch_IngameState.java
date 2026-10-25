@@ -89,6 +89,11 @@ public final class Patch_IngameState {
             return;
         }
 
+        // Viewpoint 3D：由 ViewpointAssist（tickFrame 内）处理，跳过 iso 的候选/锁定/准星覆写
+        if (ViewpointCompat.active) {
+            return;
+        }
+
         // 【瞄准时】执行详细逻辑
         try {
             AimAssistService.updateAiming(player, mouseX, mouseY, playerX, playerY, playerZ);
