@@ -235,7 +235,7 @@ Gunplay OFF 时：3D 辅助整体停用，HUD 提示"3D 辅助需要 Gunplay ON"
 - [ ] 先提交 `Lock-v5.3`（`git add -A && git commit`），保证可回退。
 - [ ] 清理实验残留：`optionSpikeAimOffsetDeg`、`ViewpointCompat.spikeApplyCount`、
   右侧 `[DBG]` 面板、`forceGunplayOff`（改为只读 `gunplayOn()`）。
-- [ ] `optionShowHud` 发布前设 false。
+- [x] `optionShowHud` 已设为 false（发布版只保留捕捉圈/锁定圈）。
 - [ ] 发布：重建 `C:\Users\Administrator\Zomboid\Workshop\RelaxedAim\`（common/42 + preview.png + workshop.txt）、
   更新 `des_ZH/EN.txt` 与 `创意工坊简介.md`、重新签名并 `VerifyZBS`。
 - [ ] `README.md` 补一节"与 Viewpoint 的兼容说明/已知限制"。

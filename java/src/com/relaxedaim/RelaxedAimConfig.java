@@ -81,8 +81,11 @@ public final class RelaxedAimConfig {
     /** 装备霰弹枪瞄准时取消辅助锁定。默认 true。 */
     public static boolean optionShotgunNoLock = true;
 
-    /** 显示 OverlayHUD（调试信息与右侧面板）。发布时设 false。默认 true（测试期开启）。 */
-    public static boolean optionShowHud = true;
+    /**
+     * 显示 OverlayHUD（调试信息、右侧面板、RAY/HIT/Lock3D/CAM 等探针行）。
+     * 只用于开发阶段，发布版保持 false：正式包里只保留捕捉圈与锁定圈（drawLockAssistUI）。
+     */
+    public static boolean optionShowHud = false;
 
     /** OverlayHUD 透明度（0-1）。默认 1.0。 */
     public static float optionHudAlpha = 1.0f;
