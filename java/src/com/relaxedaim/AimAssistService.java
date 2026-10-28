@@ -87,10 +87,13 @@ public final class AimAssistService {
             ViewpointCompat.refresh();
         } catch (Throwable t) {
         }
-        // 【Viewpoint】3D 下驱动水平吸附（写系统属性 relaxedaim.aimYawDeg）；非 3D 时归零
+        // 【Viewpoint】3D 下驱动水平/垂直吸附（写系统属性 relaxedaim.aimTanR/aimTanU）；非 3D 时归零
+        // 注意：射线偏移依赖 Viewpoint Gunplay 的结算路径（Shot.draw），Gunplay 关闭时整条 3D 辅助停用，
+        // 否则只会出现「准心动了、弹道没动」的假吸附。
         try {
             final IsoPlayer vpPlayer = IsoPlayer.getInstance();
-            if (ViewpointCompat.active && vpPlayer != null && vpPlayer.isAiming()) {
+            if (ViewpointCompat.active && ViewpointCompat.gunplayOn
+                    && vpPlayer != null && vpPlayer.isAiming()) {
                 ViewpointAssist.update(vpPlayer, IsoPlayer.getPlayerIndex());
             } else {
                 ViewpointAssist.idle();
@@ -99,9 +102,6 @@ public final class AimAssistService {
         }
         checkHotkey();
     }
-
-    /** 上一次写入系统属性的 spike 偏移（避免每帧重复设置）。 */
-    public static String lastSpikeProp = null;
 
     public static void updateAiming(IsoPlayer player, int mouseX, int mouseY,
                                      float playerX, float playerY, float playerZ) {

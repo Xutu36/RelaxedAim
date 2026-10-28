@@ -88,7 +88,8 @@ public final class Patch_Core {
                 final float facingDeg = (pl != null ? pl.getDirectionAngle() : 0.0f);
                 draw(font, x, y, "VP avail=" + ViewpointCompat.available + " active=" + ViewpointCompat.active
                         + " cap=" + ViewpointCompat.captured + " 3rd=" + ViewpointCompat.thirdPerson
-                        + " free=" + ViewpointCompat.freeCam, 1.0f, 0.6f, 1.0f, 1.0f);
+                        + " free=" + ViewpointCompat.freeCam
+                        + " gp=" + ViewpointCompat.gunplayDebug, 1.0f, 0.6f, 1.0f, 1.0f);
                 y += lineH;
                 if (!ViewpointCompat.available) {
                     String st = ViewpointCompat.debugStatus != null ? ViewpointCompat.debugStatus : "?";
@@ -98,10 +99,11 @@ public final class Patch_Core {
                     draw(font, x, y, "VP status: " + st, 1.0f, 0.4f, 0.4f, 1.0f);
                     y += lineH;
                 }
-                draw(font, x, y, String.format("VP camYaw=%.1f camPitch=%.1f | aimLook=%.1f facing=%.1f | spike=%.0f deg apply=%d",
+                draw(font, x, y, String.format("VP camYaw=%.1f camPitch=%.1f | aimLook=%.1f facing=%.1f | cap=%.0fpx | det=%s%s",
                         ViewpointCompat.lookYawDeg, ViewpointCompat.lookPitchDeg,
                         aimLookDeg, facingDeg,
-                        RelaxedAimConfig.optionSpikeAimOffsetDeg, ViewpointCompat.spikeApplyCount),
+                        ViewpointAssist.captureRadiusPx(),
+                        prop("relaxedaim.noChance", "0"), prop("relaxedaim.noDot", "0")),
                         1.0f, 0.9f, 0.4f, 1.0f);
                 y += lineH;
                 if (ViewpointCompat.available) {
@@ -112,12 +114,71 @@ public final class Patch_Core {
                             ViewpointCompat.debugMissing.isEmpty() ? "" : " miss=" + ViewpointCompat.debugMissing),
                             0.8f, 1.0f, 0.9f, 1.0f);
                     y += lineH;
-                    draw(font, x, y, String.format("VPA tgt=%d has=%s dist=%.1f raw=%+.1f assist=%+.1f %s",
+                    draw(font, x, y, String.format("VPA tgt=%d has=%s dist=%.1f raw=%+.1f assist=%+.1f px=%+.0f %s",
                             ViewpointAssist.targetId, ViewpointAssist.hasTarget, ViewpointAssist.targetDist,
-                            ViewpointAssist.rawYawDeg, ViewpointAssist.assistYawDeg,
+                            ViewpointAssist.rawYawDeg, ViewpointAssist.assistYawDeg, ViewpointAssist.aimXpx,
                             ViewpointAssist.debugReason),
                             1.0f, 0.8f, 0.5f, 1.0f);
                     y += lineH;
+                    draw(font, x, y, String.format("VPA-pitch raw=%+.1f assist=%+.1f py=%+.0f",
+                            ViewpointAssist.rawPitchDeg, ViewpointAssist.assistPitchDeg, ViewpointAssist.aimYpx),
+                            1.0f, 0.75f, 0.5f, 1.0f);
+                    y += lineH;
+                    // 【v5.4】射线/命中部位探针：证明 Patch_VPShotRay / Patch_VPShotPart 确实每枪都在跑
+                    draw(font, x, y, String.format("RAY tan=(%+.4f,%+.4f) n=%s last=%s",
+                            ViewpointAssist.aimTanR, ViewpointAssist.aimTanU,
+                            prop("relaxedaim.probeRay", "0"), prop("relaxedaim.lastRay", "-")),
+                            0.7f, 1.0f, 0.7f, 1.0f);
+                    y += lineH;
+                    try {
+                        final IsoPlayer pl2 = IsoPlayer.getInstance();
+                        String bpTxt = "?";
+                        if (pl2 != null) {
+                            final zombie.core.physics.BallisticsController bc = pl2.getBallisticsController();
+                            if (bc != null) {
+                                final int bp = bc.getTargetedBodyPart(0);
+                                final int bpc = bc.getCachedTargetedBodyPart(0);
+                                bpTxt = "tgt=" + bp + "/" + bpc;
+                            }
+                        }
+                        final int lastPart = (int) parseFloat(prop("relaxedaim.lastPart", "-1"), -1f);
+                        draw(font, x, y, "HIT " + bpTxt
+                                + " | shot=" + lastPart + " " + ragdollPartName(lastPart)
+                                + " id=" + prop("relaxedaim.lastPartId", "-")
+                                + " orig=" + prop("relaxedaim.lastPartOriginal", "-")
+                                + " n=" + prop("relaxedaim.probePart", "0"), 0.7f, 1.0f, 1.0f, 1.0f);
+                        y += lineH;
+                    } catch (Throwable t) {
+                    }
+                    // 【v5.5】3D 锁定信息（对应 iso 的 Lock: ID/Dist/wDist）+ 相机来源 + 失锁原因
+                    try {
+                        draw(font, x, y, String.format("Lock3D: ID=%d dist=%.2fm lock=(%+.0f,%+.0f) snap=%.0fms %.0f%% %s",
+                                ViewpointAssist.targetId, ViewpointAssist.targetDist,
+                                ViewpointAssist.lockPx, ViewpointAssist.lockPy,
+                                ViewpointAssist.lockSnapMs, ViewpointAssist.lockProgress * 100.0f,
+                                ViewpointAssist.hasTarget ? "HELD" : "none"),
+                                0.35f, 1.0f, 0.35f, 1.0f);
+                        y += lineH;
+                        if (ViewpointAssist.debugReleaseTimeMs > 0) {
+                            final long agoMs = System.currentTimeMillis() - ViewpointAssist.debugReleaseTimeMs;
+                            final String ago = agoMs < 1000 ? String.format("%dms", agoMs)
+                                    : String.format("%.1fs", agoMs / 1000.0);
+                            draw(font, x, y, "LastLost3D: " + ViewpointAssist.debugReleaseReason + " (" + ago + " ago)",
+                                    0.9f, 0.6f, 0.4f, 1.0f);
+                            y += lineH;
+                        }
+                        final IsoPlayer pc = IsoPlayer.getInstance();
+                        draw(font, x, y, String.format("CAM vp=%s cam=(%.1f,%.1f,%.2f) aim=(%.1f,%.1f,%.2f) %s",
+                                ViewpointAssist.camFromViewpoint,
+                                ViewpointAssist.camX, ViewpointAssist.camY, ViewpointAssist.camZ,
+                                pc != null ? pc.getAimOriginPosX() : 0.0f,
+                                pc != null ? pc.getAimOriginPosY() : 0.0f,
+                                pc != null ? pc.getAimOriginPosZ() : 0.0f,
+                                ViewpointCompat.camPlaceDebug),
+                                0.6f, 0.9f, 1.0f, 1.0f);
+                        y += lineH;
+                    } catch (Throwable t) {
+                    }
                 }
             } catch (Throwable t) {
             }
@@ -279,7 +340,7 @@ public final class Patch_Core {
      */
     public static void drawLockAssistUI() {
         if (ViewpointCompat.active) {
-            // 3D（Viewpoint）下 iso 投影坐标无意义，禁用 iso 捕捉圈/标识（否则会残留上次俯视角位置）
+            drawViewpointLockUI();
             return;
         }
         if (!RelaxedAimConfig.isLockOnEffective()) {
@@ -353,6 +414,94 @@ public final class Patch_Core {
             } catch (Exception e) {
             }
         }
+    }
+
+    /** 3D（Viewpoint）下的锁定指示：屏幕空间捕捉圈 + 锁定圈（iso 投影在 3D 无意义）。 */
+    public static void drawViewpointLockUI() {
+        try {
+            if (!RelaxedAimConfig.isLockOnEffective()) {
+                return;
+            }
+            final IsoPlayer p = IsoPlayer.getInstance();
+            if (p == null || !p.isAiming()) {
+                return;
+            }
+            if (IsoWorld.instance == null || IsoWorld.instance.currentCell == null) {
+                return;
+            }
+            final int w = zombie.iso.IsoCamera.getScreenWidth(0);
+            final int h = zombie.iso.IsoCamera.getScreenHeight(0);
+            if (w <= 0 || h <= 0) {
+                return;
+            }
+            final Texture white = Texture.getWhite();
+            final SpriteRenderer sr = SpriteRenderer.instance;
+            final float lw = 1.5f;
+            final float alpha = RelaxedAimConfig.optionHudAlpha;
+
+            // 锁定圈位置：按原 iso 瞄准时间算法从捕捉圈中心逐渐吸附到头部（ViewpointAssist.advanceLockRing）
+            final float lx = w * 0.5f + ViewpointAssist.lockPx;
+            final float ly = h * 0.5f + ViewpointAssist.lockPy;
+
+            // 青色捕捉圈：屏幕中心，半径 = 配置捕获半径 × 倍率（与 ViewpointAssist 的捕捉判定完全一致）
+            drawRing(sr, white, w * 0.5f, h * 0.5f, ViewpointAssist.captureRadiusPx(),
+                    0.35f, 0.8f, 1.0f, RelaxedAimConfig.optionCaptureCircleAlpha * alpha, lw);
+            // 紫色锁定圈：吸附后的位置；失锁后继续绘制直到回到捕捉圈中心
+            if (ViewpointAssist.hasTarget
+                    || Math.abs(ViewpointAssist.lockPx) + Math.abs(ViewpointAssist.lockPy) > 1.0f) {
+                drawRing(sr, white, lx, ly, 14.0f,
+                        1.0f, 0.3f, 1.0f, RelaxedAimConfig.optionLockMarkerAlpha * alpha, lw);
+            }
+        } catch (Throwable t) {
+        }
+    }
+
+    public static String bodyPartName(int idx) {
+        try {
+            final Object[] vs = Class.forName("zombie.characters.BodyDamage.BodyPartType").getEnumConstants();
+            if (vs != null && idx >= 0 && idx < vs.length) {
+                return ((Enum<?>) vs[idx]).name();
+            }
+        } catch (Throwable t) {
+        }
+        return "";
+    }
+
+    /** 读取系统属性（跨加载器探针用），缺省返回 def。 */
+    public static String prop(String key, String def) {
+        try {
+            final String v = System.getProperty(key);
+            return v == null ? def : v;
+        } catch (Throwable t) {
+            return def;
+        }
+    }
+
+    public static float parseFloat(String s, float def) {
+        try {
+            return Float.parseFloat(s.trim());
+        } catch (Throwable t) {
+            return def;
+        }
+    }
+
+    /**
+     * RagdollBodyPart 序号 → 名称。
+     * Viewpoint/游戏弹道用的是 RagdollBodyPart（PELVIS=0, SPINE=1, HEAD=2, ..., COUNT=11），
+     * 不是 BodyPartType（那里 Head=8），两者不能混用。
+     */
+    public static String ragdollPartName(int idx) {
+        if (idx < 0) {
+            return "-";
+        }
+        try {
+            final Object[] vs = Class.forName("zombie.core.physics.RagdollBodyPart").getEnumConstants();
+            if (vs != null && idx < vs.length) {
+                return ((Enum<?>) vs[idx]).name();
+            }
+        } catch (Throwable t) {
+        }
+        return "?";
     }
 
     public static void draw(UIFont font, int x, int y, String text, float r, float g, float b, float a) {

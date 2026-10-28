@@ -41,8 +41,37 @@ public final class ViewpointCompat {
     public static float cameraUp = 0.0f;
     public static float frameFovY = 0.0f;
 
-    /** Spike：武器瞄准偏移实际应用次数（诊断）。 */
-    public static long spikeApplyCount = 0L;
+    /**
+     * Viewpoint 的 Gunplay（3D 弹道重做）当前是否开启。
+     * 3D 辅助的射线偏移依赖 Gunplay 的结算路径（Shot.draw），Gunplay 关闭时该路径不执行，
+     * 只剩准心像素偏移会导致「准心动了、弹道没动」，因此需要据此门控。
+     * 解析失败时按 true 处理（默认就是开启），避免误伤正常场景。
+     */
+    public static boolean gunplayOn = true;
+    public static boolean gunplayKnown = false;
+    public static String gunplayDebug = "not looked";
+
+    // ---- 3D 相机位置（Viewpoint 的相机空间：x、y 为瓦片，z 为世界 z × 2.4494896） ----
+    /** CrosshairAim.camera(double[]) 的输出缓冲：与 Shot.draw 的射线起点完全同一个点。 */
+    public static final double[] camPlace = new double[3];
+    public static double camPlaceX = 0.0;
+    public static double camPlaceY = 0.0;
+    public static double camPlaceZ = 0.0;
+    public static boolean camPlaceOk = false;
+    public static String camPlaceDebug = "not looked";
+    private static java.lang.reflect.Method camPlaceMethod = null;
+    private static long camPlaceLastTryMs = 0L;
+    /** invoke 的实参数组（避免每帧分配）。 */
+    private static final Object[] camPlaceArgs = new Object[]{camPlace};
+
+    /**
+     * Viewpoint 的 Panini 投影强度（viewpoint.render.Panini.strength()，默认 0.5，关闭时为 0）。
+     * 准心像素不能直接用 tan×ppd，必须走与 Viewpoint 绘制同一套 Panini 映射，否则偏移量会偏小约 10~15%。
+     */
+    public static float paniniStrength = 0.5f;
+    public static String paniniDebug = "not looked";
+    private static java.lang.reflect.Method paniniStrengthMethod = null;
+    private static long paniniLastTryMs = 0L;
 
     /** 诊断。 */
     public static String debugStatus = "not resolved";
@@ -70,6 +99,13 @@ public final class ViewpointCompat {
 
     private static Instrumentation instrumentation;
     private static boolean instrumentationLookedUp = false;
+
+    private static ClassLoader vpLoader;
+    private static Object gunplayToggle;
+    private static java.lang.reflect.Method gGet;
+    private static java.lang.reflect.Method gSet;
+    private static boolean gunplayLooked = false;
+    private static long gunplayLastTryMs = 0L;
 
     private static long lastResolveMs = 0L;
     private static long lastLogMs = 0L;
@@ -103,6 +139,10 @@ public final class ViewpointCompat {
             cameraUp = readFloat(fCamUp);
             frameFovY = readFloat(fFovY);
             debugStatus = "OK";
+            refreshGunplay();
+            refreshPanini();
+            // 注：暂不强制关闭 Gunplay。关闭后原版弹道在 3D 下系统性偏差，反而无法爆头；
+            // 3D 弹道修正通过 Patch_VPShotRay 走 Gunplay 自己的结算路径。
         } catch (Throwable t) {
             debugStatus = "read fail: " + t.getClass().getSimpleName();
             active = false;
@@ -171,6 +211,7 @@ public final class ViewpointCompat {
             viewClass = view;
             lookClass = look;
             freeClass = free;
+            vpLoader = view.getClassLoader();
 
             final StringBuilder missing = new StringBuilder();
             fEnabled = reqField(view, "enabled", missing);
@@ -314,8 +355,150 @@ public final class ViewpointCompat {
         return instrumentation;
     }
 
-    private static ClassLoader safeContextLoader() {
+    /**
+     * 绑定 viewpoint.gunplay.Gunplay.ON（LiveSettings$Toggle），供读取与强制关闭共用。
+     * 绑定失败只记录，不抛异常。
+     */
+    private static void bindGunplay() {
+        if (gunplayToggle != null || vpLoader == null) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        if (now - gunplayLastTryMs < 2000L) {
+            return;
+        }
+        gunplayLastTryMs = now;
         try {
+            final Class<?> g = Class.forName("viewpoint.gunplay.Gunplay", false, vpLoader);
+            final Field f = g.getDeclaredField("ON");
+            f.setAccessible(true);
+            gunplayToggle = f.get(null);
+            if (gunplayToggle != null) {
+                gGet = gunplayToggle.getClass().getMethod("get");
+                gSet = gunplayToggle.getClass().getMethod("set", boolean.class);
+                gunplayLooked = true;
+                gunplayDebug = "bound";
+            } else {
+                gunplayDebug = "ON=null";
+            }
+        } catch (Throwable t) {
+            gunplayDebug = "bind fail: " + t.getClass().getSimpleName();
+        }
+    }
+
+    /** 每帧读取 Gunplay 开关（解析失败保持上一次值，初始按 true）。 */
+    public static void refreshGunplay() {
+        bindGunplay();
+        if (gGet == null || gunplayToggle == null) {
+            return;
+        }
+        try {
+            final Object v = gGet.invoke(gunplayToggle);
+            if (v instanceof Boolean) {
+                gunplayOn = ((Boolean) v).booleanValue();
+                gunplayKnown = true;
+                gunplayDebug = gunplayOn ? "ON" : "OFF";
+            }
+        } catch (Throwable t) {
+            gunplayDebug = "read fail: " + t.getClass().getSimpleName();
+        }
+    }
+
+    /** 强制关闭 Viewpoint Gunplay（保留给调试用；当前流程不再调用）。 */
+    public static void forceGunplayOff() {
+        bindGunplay();
+        if (gunplayToggle == null || gGet == null || gSet == null) {
+            return;
+        }
+        try {
+            final Object cur = gGet.invoke(gunplayToggle);
+            if (Boolean.TRUE.equals(cur)) {
+                gSet.invoke(gunplayToggle, Boolean.FALSE);
+                gunplayOn = false;
+                log("forced Gunplay OFF");
+            }
+        } catch (Throwable t) {
+        }
+    }
+
+    /**
+     * 读取 Viewpoint 的相机位置（CrosshairAim.camera(place) 的输出）。
+     *
+     * place 就是 Shot.draw 里 Sight 的起点（相机点，x/y 为瓦片、z 为世界 z×2.4494896），
+     * 因此用它算角度时，第三人称肩射 / 车内坐着等相机偏移都自动包含进去。
+     * 返回 false 表示当前不可用（未瞄准或反射失败），调用方应退回玩家瞄准原点。
+     */
+    public static boolean readCameraPlace() {
+        if (camPlaceMethod == null) {
+            if (vpLoader == null) {
+                return false;
+            }
+            final long now = System.currentTimeMillis();
+            if (now - camPlaceLastTryMs < 2000L) {
+                return false;
+            }
+            camPlaceLastTryMs = now;
+            try {
+                final Class<?> c = Class.forName("viewpoint.input.CrosshairAim", false, vpLoader);
+                final java.lang.reflect.Method m = c.getDeclaredMethod("camera", double[].class);
+                m.setAccessible(true);
+                camPlaceMethod = m;
+                camPlaceDebug = "bound";
+            } catch (Throwable t) {
+                camPlaceDebug = "bind fail: " + t.getClass().getSimpleName();
+                return false;
+            }
+        }
+        try {
+            final Object r = camPlaceMethod.invoke(null, camPlaceArgs);
+            camPlaceOk = r instanceof Boolean && ((Boolean) r).booleanValue();
+            camPlaceX = camPlace[0];
+            camPlaceY = camPlace[1];
+            camPlaceZ = camPlace[2];
+            return camPlaceOk;
+        } catch (Throwable t) {
+            camPlaceDebug = "call fail: " + t.getClass().getSimpleName();
+            camPlaceMethod = null;
+            camPlaceOk = false;
+            return false;
+        }
+    }
+
+    /** 每帧读取 Panini 投影强度（解析失败保持上一次值）。 */
+    public static void refreshPanini() {
+        if (paniniStrengthMethod == null) {
+            if (vpLoader == null) {
+                return;
+            }
+            final long now = System.currentTimeMillis();
+            if (now - paniniLastTryMs < 2000L) {
+                return;
+            }
+            paniniLastTryMs = now;
+            try {
+                final Class<?> c = Class.forName("viewpoint.render.Panini", false, vpLoader);
+                final java.lang.reflect.Method m = c.getDeclaredMethod("strength");
+                m.setAccessible(true);
+                paniniStrengthMethod = m;
+                paniniDebug = "bound";
+            } catch (Throwable t) {
+                paniniDebug = "bind fail: " + t.getClass().getSimpleName();
+                return;
+            }
+        }
+        try {
+            final Object v = paniniStrengthMethod.invoke(null);
+            if (v instanceof Number) {
+                paniniStrength = ((Number) v).floatValue();
+                paniniDebug = "s=" + paniniStrength;
+            }
+        } catch (Throwable t) {
+            paniniDebug = "call fail: " + t.getClass().getSimpleName();
+            paniniStrengthMethod = null;
+        }
+    }
+
+    private static ClassLoader safeContextLoader() {        try {
             return Thread.currentThread().getContextClassLoader();
         } catch (Throwable t) {
             return null;

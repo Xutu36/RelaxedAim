@@ -252,30 +252,68 @@ public final class TargetLockService {
 
     // ========== 锁定核心：覆盖 AimingReticle 使准星/弹道对准锁定丧尸头部 ==========
 
+    /** Viewpoint 头胶囊中心位置（Spine1→Head 的插值参数）：(1.34+1.58)/2，见 viewpoint.gunplay.Parts.SPEC。 */
+    public static final float VP_HEAD_CAPSULE_T = 1.46f;
+
     /** 复用 Vector3，避免每次分配。 */
     public static final zombie.iso.Vector3 sHeadPos = new zombie.iso.Vector3();
     public static final zombie.iso.Vector3 sNeckPos = new zombie.iso.Vector3();
+    public static final zombie.iso.Vector3 sBasePos = new zombie.iso.Vector3();
+
+    /** 俯视角默认实现（保留给 iso 的锁定标记与准心覆盖使用）。 */
+    public static boolean headAimWorldPos(IsoZombie z, zombie.iso.Vector3 out) {
+        return headAimWorldPos(z, out, true);
+    }
+
+    /** 骨骼缺失时 CombatManager.getBoneWorldPos 会退回角色脚点，用它判断"没找到骨骼"。 */
+    public static boolean isBoneAtFeet(IsoZombie z, zombie.iso.Vector3 p) {
+        try {
+            return Math.abs(p.x - z.getX()) < 0.001f
+                    && Math.abs(p.y - z.getY()) < 0.001f
+                    && Math.abs(p.z - z.getZ()) < 0.001f;
+        } catch (Throwable t) {
+            return true;
+        }
+    }
 
     /**
-     * 头部世界瞄准点 = Bip01_Head 骨骼 + 沿「颈部→头部」方向的偏移（headAimOffset）。
-     * 方向随姿态自适应：待机低头沿头骨倾斜方向、奔跑略前倾、倒地沿贴地的头骨方向，不依赖简单 Z 轴。
+     * 头部瞄准点。
+     *
+     * @param applyIsoOffset true  = 俯视角：Bip01_Head + 沿「颈部→头部」的 headAimOffset（iso 投影补偿）
+     *                       false = 3D（Viewpoint）：头胶囊中心 = Spine1 + 1.46×(Head−Spine1)。
+     *                               头骨骼在视觉上位于脖子根部，直接用它会让准心/锁定圈偏低；
+     *                               而 1.46 正是 Viewpoint 自己判定爆头用的胶囊中点，所以既对准视觉头部、
+     *                               又保证射线一定落在头胶囊里。
      */
-    public static boolean headAimWorldPos(IsoZombie z, zombie.iso.Vector3 out) {
+    public static boolean headAimWorldPos(IsoZombie z, zombie.iso.Vector3 out, boolean applyIsoOffset) {
         try {
             zombie.CombatManager.getBoneWorldPos(z, "Bip01_Head", out);
-            zombie.CombatManager.getBoneWorldPos(z, "Bip01_Neck", sNeckPos);
-            float dx = out.x - sNeckPos.x;
-            float dy = out.y - sNeckPos.y;
-            float dz = out.z - sNeckPos.z;
-            final float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (len > 0.001f) {
-                dx /= len;
-                dy /= len;
-                dz /= len;
-                out.x += dx * RelaxedAimConfig.headAimOffset;
-                out.y += dy * RelaxedAimConfig.headAimOffset;
-                out.z += dz * RelaxedAimConfig.headAimOffset;
+            if (isBoneAtFeet(z, out)) {
+                return false;
             }
+            if (applyIsoOffset) {
+                zombie.CombatManager.getBoneWorldPos(z, "Bip01_Neck", sNeckPos);
+                float dx = out.x - sNeckPos.x;
+                float dy = out.y - sNeckPos.y;
+                float dz = out.z - sNeckPos.z;
+                final float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (len > 0.001f) {
+                    dx /= len;
+                    dy /= len;
+                    dz /= len;
+                    out.x += dx * RelaxedAimConfig.headAimOffset;
+                    out.y += dy * RelaxedAimConfig.headAimOffset;
+                    out.z += dz * RelaxedAimConfig.headAimOffset;
+                }
+                return true;
+            }
+            zombie.CombatManager.getBoneWorldPos(z, "Bip01_Spine1", sBasePos);
+            if (isBoneAtFeet(z, sBasePos)) {
+                return true;
+            }
+            out.x = sBasePos.x + (out.x - sBasePos.x) * VP_HEAD_CAPSULE_T;
+            out.y = sBasePos.y + (out.y - sBasePos.y) * VP_HEAD_CAPSULE_T;
+            out.z = sBasePos.z + (out.z - sBasePos.z) * VP_HEAD_CAPSULE_T;
             return true;
         } catch (Exception e) {
             return false;
@@ -481,6 +519,10 @@ public final class TargetLockService {
         if (lockedTarget != null) {
             if (isLockValid(player, weapon, mouseX, mouseY)) {
                 invalidSinceMs = 0L;
+                // 最近优先：搜索帧里若有明显更近的候选，就切换到它（俯视角与 3D 同一原则）
+                if (candidates != null) {
+                    switchToNearer(player, candidates, mouseX, mouseY);
+                }
                 updateDebug();
                 return; // 锁定仍有效，保持不变（滞回区）
             }
@@ -589,6 +631,51 @@ public final class TargetLockService {
         } catch (Exception e) {
             pendingReleaseReason = "invalid";
             return false;
+        }
+    }
+
+    /** 切换目标所需的最小距离优势（瓦片）：避免两只同距离丧尸之间反复横跳。 */
+    public static final float NEAREST_SWITCH_MARGIN = 0.5f;
+
+    /**
+     * 最近优先（iso）：锁定期间若候选里出现「明显更靠近玩家」的丧尸，切换锁定到它。
+     * 只在新目标比当前目标近 NEAREST_SWITCH_MARGIN 以上才切换，避免抖动。
+     * 3D 侧在 ViewpointAssist 里用同样的规则（NEAREST_SWITCH_MARGIN 同值）。
+     */
+    public static void switchToNearer(IsoPlayer player, List<IsoZombie> candidates, int mouseX, int mouseY) {
+        final IsoZombie cur = lockedTarget;
+        if (cur == null || candidates == null || candidates.isEmpty()) {
+            return;
+        }
+        IsoZombie best = null;
+        float bestD = Float.MAX_VALUE;
+        for (final IsoZombie z : candidates) {
+            if (z == null || z == cur || z.isDead() || !z.isAlive()) {
+                continue;
+            }
+            try {
+                final float d = player.DistTo(z);
+                if (d < bestD) {
+                    bestD = d;
+                    best = z;
+                }
+            } catch (Exception e) {
+            }
+        }
+        if (best == null) {
+            return;
+        }
+        try {
+            final float curD = player.DistTo(cur);
+            if (bestD < curD - NEAREST_SWITCH_MARGIN) {
+                releaseLock("nearer");
+                lockedTarget = best;
+                lockWorldDist = bestD;
+                lockScreenDist = computeScreenDist(best, mouseX, mouseY);
+                strongLock = false;
+                snapStartMs = System.currentTimeMillis();
+            }
+        } catch (Exception e) {
         }
     }
 

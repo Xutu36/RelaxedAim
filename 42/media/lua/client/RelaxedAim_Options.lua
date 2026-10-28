@@ -29,10 +29,6 @@ options:addDescription("UI_RelaxedAim_CaptureCircleAlpha_desc")
 config.lockMarkerAlpha = options:addSlider("lockMarkerAlpha", "UI_RelaxedAim_LockMarkerAlpha", 0.0, 1.0, 0.05, 0.9, "UI_RelaxedAim_LockMarkerAlpha_desc")
 options:addDescription("UI_RelaxedAim_LockMarkerAlpha_desc")
 
--- 【Spike】Viewpoint 武器瞄准 yaw 偏移（度）：0 = 关闭；>0/<0 验证「只偏转武器瞄准、不动相机」
-config.spikeAimOffset = options:addSlider("spikeAimOffset", "UI_RelaxedAim_SpikeAimOffset", -90, 90, 1, 0, "UI_RelaxedAim_SpikeAimOffset_desc")
-options:addDescription("UI_RelaxedAim_SpikeAimOffset_desc")
-
 config.maxLockDistance = options:addSlider("maxLockDistance", "UI_RelaxedAim_MaxLockDistance", 0, 20, 1, 5, "UI_RelaxedAim_MaxLockDistance_desc")
 options:addDescription("UI_RelaxedAim_MaxLockDistance_desc")
 
