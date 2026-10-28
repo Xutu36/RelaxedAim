@@ -21,8 +21,8 @@ import java.util.List;
 public final class RelaxedAimConfig {
 
     /** 版本号唯一来源（HUD 与主菜单显示），每次改动必须升级 + 更新 VERSION_NOTES。 */
-    public static final String VERSION = "Lock-v5.8";
-    public static final String VERSION_NOTES = "锁定选择改为最近优先: 遍历捕捉圈内丧尸取距玩家最近的一只(同距用屏幕距离), 俯视角与3D通用; 锁定期间若有比当前目标近 0.5 瓦片以上的丧尸则切换(nearer); mod.info 的 name 改为 RelaxedAim(VP 3D sup.) 以便在 ZB 审批面板正常显示";
+    public static final String VERSION = "Lock-v5.9";
+    public static final String VERSION_NOTES = "3D 平衡与地形适配: 3D 吸附时间乘硬编码系数0.5(比俯视角快一倍, ViewpointAssist.VP_SNAP_SCALE); 瞄准点加上 Viewpoint 的地形起伏(FarRelief.Lift.scene = Ground.under), 修坡地/台阶附近锁定偏低偏高的垂直偏差";
 
     // ========== 本地设置（游戏设置-模组，ModOptions.ini） ==========
 

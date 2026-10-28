@@ -5,7 +5,7 @@
 > `HIT 11` 是"无部位"哨兵。3D 弹道的正确注入点与完整逆向证据见 **`VIEWPOINT_NEXT_STEPS.md`**，
 > 变更记录见本文第 12 节。
 
-> 目的：迁移工作栈时快速恢复上下文。最后更新：Lock-v5.7（3D 确定性弹道、隐藏 Gunplay 漂浮点）。
+> 目的：迁移工作栈时快速恢复上下文。最后更新：Lock-v5.9（3D 吸附加速、地形起伏适配）。
 > 说明：中文为主，路径均为本机实测。
 
 ---
@@ -323,3 +323,18 @@ cd D:\PZMod\RelaxedAim\java
 
 **副作用**：瞄准环收成最小（`targetChance=100` 的正常表现）；霰弹枪弹丸散射（`Gunplay.pattern`）不受影响；
 iso 完全不变。
+
+### 12.7 v5.9：3D 吸附加速 + 地形起伏适配
+
+1. **3D 吸附时间 × 0.5**（`ViewpointAssist.VP_SNAP_SCALE`，硬编码）：3D 枪战难度曲线比俯视角陡得多，
+   吸附时间减半 = 速度快一倍。仍复用 iso 的 `computeSnapTimeMs` 曲线，只缩放时间（iso 不变）。
+2. **地形起伏（坡地/台阶）锁定垂直偏差**：Viewpoint 在 `Bodies.of` 里给所有骨骼胶囊加了
+   `Ground.under(角色)`，而 `Ground.at = FarRelief.Lift.scene(x,y)` 返回的是
+   **相对当前相机地面**的抬升（Viewpoint up 单位，`(metres(x,y) − metres(相机)) × levels × 2.449`）。
+   我们的瞄准点原先只有 `头骨 z × 2.449`，所以在起伏地形上与胶囊差一个抬升量 → 锁定整体偏低/偏高（取决于坡向）。
+   修法：`ViewpointAssist.headAim` 加上 `ViewpointCompat.reliefAt(角色x, 角色y)`，与 VP 用同一个量、同一个取样点
+   （用角色坐标而不是头部坐标——倒地时头离角色中心远，用头部坐标会引入水平方向的取样误差）。
+   反射路径：`viewpoint.far.Relief.current()` → `viewpoint.render.FarRelief$Lift.scene(double,double)`；
+   拿不到（地形起伏功能关闭/未初始化）时 `reliefAt` 返回 0，行为退化为改前。
+
+**验证**：坡地上锁定站立/倒地丧尸，准心应落在头部而不是脚边/头顶；HUD 关掉后看 `HIT shot=2` 是否稳定。

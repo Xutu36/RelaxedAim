@@ -86,6 +86,11 @@ public final class ViewpointAssist {
     /** 垂直方向需要覆盖"瞄倒地丧尸头部"这种大俯角，故上限远大于水平。 */
     public static final float MAX_ASSIST_PITCH_DEG = 55.0f;
     public static final float MAX_ACQUIRE_DIST = 20.0f;
+    /**
+     * 3D 吸附时间平衡系数（硬编码）：3D 枪战难度曲线比俯视角陡得多，
+     * 吸附时间 × 0.5 = 吸附速度快一倍（与 iso 的 computeSnapTimeMs 同一套曲线，只缩放时间）。
+     */
+    public static final float VP_SNAP_SCALE = 0.5f;
     /** 锁定期间重扫"有没有更近的丧尸"的间隔帧数（只影响切换优先级，不影响锁定本身）。 */
     public static final int RESCAN_FRAMES = 6;
     /** 切换目标所需的最小距离优势（瓦片）：避免两只同距离丧尸之间反复横跳。 */
@@ -367,7 +372,8 @@ public final class ViewpointAssist {
             }
             float snapMs = 1.0f;
             try {
-                snapMs = Math.max(1.0f, TargetLockService.computeSnapTimeMs(pIndex));
+                // 3D 下枪战难度曲线比俯视角陡得多：吸附时间乘 0.5（= 快一倍）作为平衡系数
+                snapMs = Math.max(1.0f, TargetLockService.computeSnapTimeMs(pIndex) * VP_SNAP_SCALE);
             } catch (Throwable t) {
             }
             lockSnapMs = snapMs;
@@ -456,7 +462,7 @@ public final class ViewpointAssist {
         }
     }
 
-    /** 把目标瞄准点换算到 up 空间（世界 z × 2.4494896）。 */
+    /** 把目标瞄准点换算到 up 空间（世界 z × 2.4494896 + 地形起伏）。 */
     private static boolean headAim(IsoZombie z) {
         // 3D 用 Viewpoint 头胶囊中心（Spine1→Head 的 1.46），不是头骨骼本身
         if (!TargetLockService.headAimWorldPos(z, TargetLockService.sHeadPos, false)) {
@@ -464,7 +470,11 @@ public final class ViewpointAssist {
         }
         sHeadUpX = TargetLockService.sHeadPos.x;
         sHeadUpY = TargetLockService.sHeadPos.y;
-        sHeadUpZ = (double) TargetLockService.sHeadPos.z * Z_SCALE;
+        // 地形起伏：Viewpoint 的骨骼胶囊会加上 Ground.under(角色)（= FarRelief.Lift.scene，相对相机地面），
+        // 我们的瞄准点必须加同一个量，否则在坡地上会整体偏低/偏高（视坡向而定）。
+        // 注意用角色自身的 x/y（Bodies 就是这么取的），倒地时头部离角色中心较远，取头部坐标会有偏差。
+        sHeadUpZ = (double) TargetLockService.sHeadPos.z * Z_SCALE
+                + ViewpointCompat.reliefAt(z.getX(), z.getY());
         return true;
     }
 

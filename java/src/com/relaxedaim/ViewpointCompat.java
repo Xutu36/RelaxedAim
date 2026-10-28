@@ -73,6 +73,19 @@ public final class ViewpointCompat {
     private static java.lang.reflect.Method paniniStrengthMethod = null;
     private static long paniniLastTryMs = 0L;
 
+    /**
+     * 地形起伏（Viewpoint 的 FarRelief）：每帧缓存 viewpoint.far.Relief.current() 返回的 Lift，
+     * 用于把目标头部抬到它真实所在的地形高度。
+     * Lift.scene(x,y) 返回「相对当前相机地面」的抬升（Viewpoint 的 up 单位，1 级 = 2.449），
+     * 与 viewpoint.gunplay.Bodies.put 给骨骼胶囊加的正是同一个量。
+     */
+    public static Object reliefLift = null;
+    public static boolean reliefOk = false;
+    public static String reliefDebug = "not looked";
+    private static java.lang.reflect.Method reliefCurrentMethod = null;
+    private static java.lang.reflect.Method reliefSceneMethod = null;
+    private static long reliefLastTryMs = 0L;
+
     /** 诊断。 */
     public static String debugStatus = "not resolved";
     public static String debugHow = "";
@@ -141,6 +154,7 @@ public final class ViewpointCompat {
             debugStatus = "OK";
             refreshGunplay();
             refreshPanini();
+            refreshRelief();
             // 注：暂不强制关闭 Gunplay。关闭后原版弹道在 3D 下系统性偏差，反而无法爆头；
             // 3D 弹道修正通过 Patch_VPShotRay 走 Gunplay 自己的结算路径。
         } catch (Throwable t) {
@@ -495,6 +509,61 @@ public final class ViewpointCompat {
         } catch (Throwable t) {
             paniniDebug = "call fail: " + t.getClass().getSimpleName();
             paniniStrengthMethod = null;
+        }
+    }
+
+    /**
+     * 每帧刷新地形起伏对象（viewpoint.far.Relief.current() → viewpoint.render.FarRelief$Lift）。
+     * 拿不到就当作平地（reliefAt 返回 0），不影响其它功能。
+     */
+    public static void refreshRelief() {
+        if (reliefCurrentMethod == null || reliefSceneMethod == null) {
+            if (vpLoader == null) {
+                return;
+            }
+            final long now = System.currentTimeMillis();
+            if (now - reliefLastTryMs < 2000L) {
+                return;
+            }
+            reliefLastTryMs = now;
+            try {
+                final Class<?> rel = Class.forName("viewpoint.far.Relief", false, vpLoader);
+                final java.lang.reflect.Method cur = rel.getDeclaredMethod("current");
+                cur.setAccessible(true);
+                final Class<?> lift = Class.forName("viewpoint.render.FarRelief$Lift", false, vpLoader);
+                final java.lang.reflect.Method sc = lift.getDeclaredMethod("scene", double.class, double.class);
+                sc.setAccessible(true);
+                reliefCurrentMethod = cur;
+                reliefSceneMethod = sc;
+                reliefDebug = "bound";
+            } catch (Throwable t) {
+                reliefDebug = "bind fail: " + t.getClass().getSimpleName();
+                return;
+            }
+        }
+        try {
+            final Object o = reliefCurrentMethod.invoke(null);
+            reliefLift = o;
+            reliefOk = o != null;
+            reliefDebug = reliefOk ? "ok" : "no-lift";
+        } catch (Throwable t) {
+            reliefDebug = "call fail: " + t.getClass().getSimpleName();
+            reliefCurrentMethod = null;
+            reliefLift = null;
+        }
+    }
+
+    /** (x, y) 处的地形抬升（Viewpoint up 单位，相对当前相机地面；无地形/不可用时 0）。 */
+    public static float reliefAt(float x, float y) {
+        final Object lift = reliefLift;
+        if (lift == null || reliefSceneMethod == null) {
+            return 0.0f;
+        }
+        try {
+            final Object v = reliefSceneMethod.invoke(lift, (double) x, (double) y);
+            return v instanceof Number ? ((Number) v).floatValue() : 0.0f;
+        } catch (Throwable t) {
+            return 0.0f;
         }
     }
 
